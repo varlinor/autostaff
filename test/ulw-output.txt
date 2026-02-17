@@ -1,0 +1,13 @@
+=== STDOUT ===
+ULTRAWORK MODE ENABLED!
+
+hello world
+
+
+=== STDERR ===
+[0m> Sisyphus (Ultraworker) · MiniMax-M2.5
+[0m
+
+
+
+=== Exit code: 0 ===
