@@ -3,7 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec } from "./lib/project.js";
+import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec, runOneTask, getNextExecutableTask } from "./lib/project.js";
 
 const SERVER_NAME = "auto-code-bot";
 const SERVER_VERSION = "0.1.0";
@@ -59,6 +59,43 @@ Phase explanation:
             {
               type: "text",
               text: `Error getting project status: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "auto_dev_run_one_task",
+    {
+      project_dir: z.string().describe("Project directory path (absolute or relative)"),
+      model: z.string().optional().describe("Model to use (e.g., 'minimax(Custom)/MiniMax-M2.5')"),
+      ulw: z.boolean().optional().describe("Enable ultrawork mode for high precision"),
+      max_iterations: z.number().optional().describe("Maximum iterations (default: 1 for single task)")
+    },
+    async ({ project_dir, model, ulw, max_iterations }) => {
+      try {
+        const result = runOneTask(project_dir, {
+          model,
+          ulw,
+          maxIterations: max_iterations
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: result.message,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error running task: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
         };

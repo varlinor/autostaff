@@ -7,12 +7,12 @@
 - task-mcp-1: Implement MCP service entry point and stdio transport ✅
 - task-cli-1: Verify CLI package is working with all parameters ✅
 - task-mcp-2: Implement auto_dev_status Tool and Resources ✅
+- task-mcp-3: Implement auto_dev_run_one_task Tool ✅
 
 ### In Progress
-- task-mcp-3: Implement auto_dev_run_one_task Tool
+- task-mcp-4: Implement auto_dev_start Tool
 
 ### Pending
-- task-mcp-4: Implement auto_dev_start Tool
 - task-publish-1: Verify multi-package build and publish workflow
 - task-docs-1: Update documentation with MCP configuration instructions
 
@@ -22,4 +22,5 @@
 - Fixed CLI config file path bug - was looking in wrong directory
 - Implemented auto_dev_status tool with phase detection and task parsing
 - Added Resources: task.json, progress.txt, app_spec.md
-- 4/8 tasks passing
+- Implemented auto_dev_run_one_task tool - spawns opencode to execute one task
+- 5/8 tasks passing

@@ -83,7 +83,7 @@
         "5. VERIFY: pnpm build:mcp succeeds with exit code 0",
         "6. VERIFY: In MCP client, calling auto_dev_run_one_task updates target project task.json (passes:false -> passes:true)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-mcp-4",

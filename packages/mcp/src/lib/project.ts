@@ -5,6 +5,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 
 export interface Task {
   id?: number | string;
@@ -15,6 +16,13 @@ export interface Task {
   type?: "package" | "app";
   workspace?: string;
   dependsOn?: (number | string)[];
+}
+
+export interface RunOneTaskOptions {
+  model?: string;
+  ulw?: boolean;
+  agent?: string;
+  maxIterations?: number;
 }
 
 const TASK_FILE = "task.json";
@@ -180,4 +188,192 @@ export function getProjectStatus(projectDir: string): ProjectStatus {
     categories,
     progressSummary
   };
+}
+
+function normalizeDepId(dep: number | string): string {
+  return String(dep);
+}
+
+function getTaskId(task: Task): string {
+  return String(task.id ?? "");
+}
+
+function topologicalSort(tasks: Task[]): Task[] {
+  const taskMap = new Map<string, Task>();
+  const inDegree = new Map<string, number>();
+  const dependsOnMap = new Map<string, string[]>();
+
+  for (const task of tasks) {
+    const id = getTaskId(task);
+    taskMap.set(id, task);
+    inDegree.set(id, 0);
+    dependsOnMap.set(id, (task.dependsOn || []).map(normalizeDepId));
+  }
+
+  for (const [id, deps] of dependsOnMap) {
+    for (const depId of deps) {
+      const currentDegree = inDegree.get(id) ?? 0;
+      inDegree.set(id, currentDegree + 1);
+    }
+  }
+
+  const queue: string[] = [];
+  for (const [id, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(id);
+    }
+  }
+
+  const sorted: Task[] = [];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    const task = taskMap.get(id);
+    if (task) {
+      sorted.push(task);
+    }
+
+    for (const [otherId, deps] of dependsOnMap) {
+      if (deps.includes(id)) {
+        const newDegree = (inDegree.get(otherId) ?? 1) - 1;
+        inDegree.set(otherId, newDegree);
+        if (newDegree === 0) {
+          queue.push(otherId);
+        }
+      }
+    }
+  }
+
+  if (sorted.length !== tasks.length) {
+    console.error("Warning: Circular dependency detected in task.json");
+    return tasks;
+  }
+
+  return sorted;
+}
+
+function parseTasksFromFile(projectDir: string): Task[] {
+  const taskFile = path.join(projectDir, TASK_FILE);
+  if (!fs.existsSync(taskFile)) {
+    return [];
+  }
+  const content = fs.readFileSync(taskFile, "utf-8");
+  return parseTasks(content);
+}
+
+export function getExecutableTasks(projectDir: string): Task[] {
+  const tasks = parseTasksFromFile(projectDir);
+  const sorted = topologicalSort(tasks);
+
+  const completedIds = new Set<string>();
+  for (const task of sorted) {
+    if (task.passes) {
+      completedIds.add(getTaskId(task));
+    }
+  }
+
+  const executable: Task[] = [];
+  for (const task of sorted) {
+    if (task.passes) {
+      continue;
+    }
+
+    const deps = (task.dependsOn || []).map(normalizeDepId);
+    const allDepsCompleted = deps.every((depId) => completedIds.has(depId));
+
+    if (allDepsCompleted) {
+      executable.push(task);
+    }
+  }
+
+  return executable;
+}
+
+export function getNextExecutableTask(projectDir: string): Task | null {
+  const executable = getExecutableTasks(projectDir);
+  return executable.length > 0 ? executable[0] : null;
+}
+
+const DEFAULT_MODEL = "minimax(Custom)/MiniMax-M2.5";
+
+export function runOneTask(
+  projectDir: string,
+  options: RunOneTaskOptions = {}
+): { success: boolean; message: string; taskId?: string; pid?: number } {
+  const resolvedDir = path.resolve(projectDir);
+  
+  // Check phase
+  const phase = detectPhase(resolvedDir);
+  if (phase !== "execute") {
+    return {
+      success: false,
+      message: `Project is not in execute phase. Current phase: ${phase}. Need app_spec.md and task.json to execute tasks.`
+    };
+  }
+
+  // Get next task
+  const nextTask = getNextExecutableTask(resolvedDir);
+  if (!nextTask) {
+    return {
+      success: false,
+      message: "No executable tasks found. All tasks are either completed or waiting for dependencies."
+    };
+  }
+
+  const taskId = getTaskId(nextTask);
+  const taskDesc = nextTask.description;
+  const workspace = nextTask.workspace;
+
+  // Build the command
+  const model = options.model || DEFAULT_MODEL;
+  const ulwFlag = options.ulw ? "--ulw" : "";
+  const maxIterFlag = options.maxIterations ? `--max-iterations ${options.maxIterations}` : "";
+  
+  // For single task execution, we set max-iterations to 1
+  const finalMaxIter = "--max-iterations 1";
+
+  // Build workspace path if needed
+  const effectiveDir = workspace 
+    ? path.join(resolvedDir, workspace)
+    : resolvedDir;
+  
+  const workspaceArg = workspace ? `--workspace "${workspace}"` : "";
+  const fullCommand = `opencode run --model "${model}" ${ulwFlag} ${finalMaxIter} ${workspaceArg} "Execute task '${taskId}: ${taskDesc}'. Read AGENTS.md and implement this task. After completing, update task.json to mark it as passes:true, then commit with git."`;
+
+  try {
+    // Spawn in background (detached not needed, just don't wait)
+    const child = spawn(fullCommand, [], {
+      cwd: effectiveDir,
+      shell: true,
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: true,
+    });
+
+    // Log output to stderr (MCP uses stderr for server logs)
+    child.stdout?.on("data", (data) => {
+      process.stderr.write(data.toString());
+    });
+    
+    child.stderr?.on("data", (data) => {
+      process.stderr.write(data.toString());
+    });
+
+    child.on("error", (err) => {
+      process.stderr.write(`Error spawning opencode: ${err.message}\n`);
+    });
+
+    // Unref to allow parent to exit independently
+    child.unref();
+
+    return {
+      success: true,
+      message: `Started task execution for '${taskId}: ${taskDesc}'.\n\nProject: ${resolvedDir}\nWorkspace: ${workspace || "root"}\nModel: ${model}\nULW: ${options.ulw ? "enabled" : "disabled"}\n\nPID: ${child.pid}\n\nPoll auto_dev_status to track progress.`,
+      taskId,
+      pid: child.pid
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Failed to start task: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
 }
