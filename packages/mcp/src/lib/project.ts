@@ -256,12 +256,22 @@ function parseTasksFromFile(projectDir: string): Task[] {
   if (!fs.existsSync(taskFile)) {
     return [];
   }
-  const content = fs.readFileSync(taskFile, "utf-8");
-  return parseTasks(content);
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    return parseTasks(content);
+  } catch (e) {
+    console.error(`Warning: Failed to parse task.json: ${e}`);
+    return [];
+  }
 }
 
 export function getExecutableTasks(projectDir: string): Task[] {
   const tasks = parseTasksFromFile(projectDir);
+  
+  if (tasks.length === 0) {
+    return [];
+  }
+  
   const sorted = topologicalSort(tasks);
 
   const completedIds = new Set<string>();
@@ -312,10 +322,18 @@ export function runOneTask(
 
   // Get next task
   const nextTask = getNextExecutableTask(resolvedDir);
+  const { passing, total } = countPassingFeatures(resolvedDir);
+  
   if (!nextTask) {
+    if (total > 0 && passing === total) {
+      return {
+        success: false,
+        message: "All tasks are complete! Use extend mode to add new features, or manually add new tasks to task.json with passes:false."
+      };
+    }
     return {
       success: false,
-      message: "No executable tasks found. All tasks are either completed or waiting for dependencies."
+      message: "No executable tasks found. All tasks are either completed or waiting for dependencies. Check task.json for dependency issues."
     };
   }
 

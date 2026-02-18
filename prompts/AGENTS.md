@@ -3,7 +3,13 @@
 You are continuing work on a long-running autonomous development task.
 This is a FRESH context window - you have no memory of previous sessions.
 
-### STEP 1: GET YOUR BEARINGS (MANDATORY)
+### CONTEXT MANAGEMENT
+
+**If the conversation gets long (more than 20 messages), explicitly request compaction:**
+- Say "Please compact the conversation" to summarize and reduce token count
+- This keeps responses fast and prevents hitting token limits
+
+### STEP 1: GET YOUR BEARINGS (MANDMANDATORY)
 
 Start by orienting yourself:
 

@@ -59,12 +59,12 @@
       "dependsOn": ["task-mcp-1"],
       "steps": [
         "1. Implement Tool: auto_dev_status(project_dir) - returns phase, passing/total, category stats, recent progress summary",
-        "2. Implement Resource: project://{project_dir}/task.json - read-only task.json content",
-        "3. Implement Resource: project://{project_dir}/progress.txt - read-only progress.txt content",
-        "4. Implement Resource: project://{project_dir}/app_spec.md - read-only app_spec.md content",
+        "2. Implement Resource: project:{ project_dir }/task.json - read-only task.json content",
+        "3. Implement Resource: project:{ project_dir }/progress.txt - read-only progress.txt content",
+        "4. Implement Resource: project:{ project_dir }/app_spec.md - read-only app_spec.md content",
         "5. Reuse CLI or core phase detection and task parsing logic",
         "6. VERIFY: pnpm build:mcp succeeds with exit code 0",
-"7. VERIFY: In MCP client, calling auto_dev_status returns correct response matching target project files"
+        "7. VERIFY: In MCP client, calling auto_dev_status returns correct response matching target project files"
       ],
       "passes": true
     },
