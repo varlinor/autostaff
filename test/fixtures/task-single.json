@@ -1,0 +1,18 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "category": "functional",
+      "description": "Initialize project structure",
+      "steps": ["Run npm init", "Install dependencies"],
+      "passes": false
+    },
+    {
+      "id": "task-2",
+      "category": "functional",
+      "description": "Create component",
+      "steps": ["Create Button component"],
+      "passes": false
+    }
+  ]
+}

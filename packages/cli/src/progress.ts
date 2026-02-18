@@ -3,11 +3,14 @@ import path from "node:path";
 import chalk from "chalk";
 
 export interface Task {
-  id?: number;
+  id?: number | string;
   category: string;
   description: string;
   steps: string[];
   passes: boolean;
+  type?: "package" | "app";
+  workspace?: string;
+  dependsOn?: (number | string)[];
 }
 
 const TASK_FILE = "task.json";
@@ -130,4 +133,110 @@ export function readProgressNotes(projectDir: string): string | null {
     return fs.readFileSync(progressFile, "utf-8");
   }
   return null;
+}
+
+export function getTaskId(task: Task): string {
+  return String(task.id ?? "");
+}
+
+function normalizeDepId(dep: number | string): string {
+  return String(dep);
+}
+
+export function topologicalSort(tasks: Task[]): Task[] {
+  const taskMap = new Map<string, Task>();
+  const inDegree = new Map<string, number>();
+  const dependsOnMap = new Map<string, string[]>();
+
+  for (const task of tasks) {
+    const id = getTaskId(task);
+    taskMap.set(id, task);
+    inDegree.set(id, 0);
+    dependsOnMap.set(id, (task.dependsOn || []).map(normalizeDepId));
+  }
+
+  for (const [id, deps] of dependsOnMap) {
+    for (const depId of deps) {
+      const currentDegree = inDegree.get(id) ?? 0;
+      inDegree.set(id, currentDegree + 1);
+    }
+  }
+
+  const queue: string[] = [];
+  for (const [id, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(id);
+    }
+  }
+
+  const sorted: Task[] = [];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    const task = taskMap.get(id);
+    if (task) {
+      sorted.push(task);
+    }
+
+    for (const [otherId, deps] of dependsOnMap) {
+      if (deps.includes(id)) {
+        const newDegree = (inDegree.get(otherId) ?? 1) - 1;
+        inDegree.set(otherId, newDegree);
+        if (newDegree === 0) {
+          queue.push(otherId);
+        }
+      }
+    }
+  }
+
+  if (sorted.length !== tasks.length) {
+    console.log(chalk.yellow("  Warning: Circular dependency detected in task.json"));
+    return tasks;
+  }
+
+  return sorted;
+}
+
+export function getExecutableTasks(projectDir: string): Task[] {
+  const taskFile = path.join(projectDir, TASK_FILE);
+
+  if (!fs.existsSync(taskFile)) {
+    return [];
+  }
+
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    const tasks = parseTasks(content);
+    const sorted = topologicalSort(tasks);
+
+    const completedIds = new Set<string>();
+    for (const task of sorted) {
+      if (task.passes) {
+        completedIds.add(getTaskId(task));
+      }
+    }
+
+    const executable: Task[] = [];
+    for (const task of sorted) {
+      if (task.passes) {
+        continue;
+      }
+
+      const deps = (task.dependsOn || []).map(normalizeDepId);
+      const allDepsCompleted = deps.every((depId) => completedIds.has(depId));
+
+      if (allDepsCompleted) {
+        executable.push(task);
+      }
+    }
+
+    return executable;
+  } catch (e) {
+    console.log(chalk.yellow(`  Warning: Failed to get executable tasks: ${e}`));
+    return [];
+  }
+}
+
+export function getNextExecutableTask(projectDir: string): Task | null {
+  const executable = getExecutableTasks(projectDir);
+  return executable.length > 0 ? executable[0] : null;
 }

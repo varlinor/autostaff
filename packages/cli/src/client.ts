@@ -2,12 +2,14 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
 import path from "node:path";
 import chalk from "chalk";
+import { getEffectiveDir } from "./workspace.js";
 
 export const DEFAULT_MODEL = "minimax(Custom)/MiniMax-M2.5";
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes max per session
+const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
 
 export interface OpenCodeOptions {
   cwd: string;
+  workspace?: string;
   model?: string;
   agent?: string;
   ulw?: boolean;
@@ -24,33 +26,36 @@ export class OpenCodeClient extends EventEmitter {
 
   async run(message: string): Promise<{ status: "continue" | "error"; output: string }> {
     const model = this.options.model || DEFAULT_MODEL;
-    const cwd = this.options.cwd;
+    const effectiveDir = getEffectiveDir(this.options.cwd, this.options.workspace);
     const finalMessage = this.options.ulw ? `ulw ${message}` : message;
 
-    const cmdLine = `opencode run --model "${model}" --dir "${cwd}" ${finalMessage}`;
+    const workspaceInfo = this.options.workspace
+      ? chalk.dim(` [workspace: ${this.options.workspace}]`)
+      : "";
+    const cmdLine = `opencode run --model "${model}" --dir "${effectiveDir}" ${finalMessage}`;
 
     return new Promise((resolve) => {
       let settled = false;
       let timeoutId: NodeJS.Timeout;
 
-      console.log(`\n[auto-dev] Executing: ${cmdLine.substring(0, 120)}...`);
-      console.log(chalk.cyan("[auto-dev] Starting opencode...\n"));
+      console.log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
+      console.log(chalk.cyan("[auto-code-bot] Starting opencode...\n"));
 
       this.process = spawn(cmdLine, [], {
-        cwd: cwd,
+        cwd: effectiveDir,
         shell: true,
         stdio: ["ignore", "pipe", "pipe"],
         env: { ...process.env, TERM: "dumb" },
       });
 
       this.process.on("spawn", () => {
-        console.log(chalk.green("[auto-dev] opencode started (PID: " + this.process?.pid + ")\n"));
+        console.log(chalk.green("[auto-code-bot] opencode started (PID: " + this.process?.pid + ")\n"));
       });
 
       timeoutId = setTimeout(() => {
         if (!settled) {
           settled = true;
-          console.log(chalk.yellow(`\n[auto-dev] Timeout after ${SESSION_TIMEOUT_MS / 60000}min, killing...`));
+          console.log(chalk.yellow(`\n[auto-code-bot] Timeout after ${SESSION_TIMEOUT_MS / 60000}min, killing...`));
           if (this.process) {
             this.process.kill("SIGTERM");
           }
@@ -74,7 +79,7 @@ export class OpenCodeClient extends EventEmitter {
         if (!settled) {
           settled = true;
           this.process = null;
-          console.log(chalk.green(`\n[auto-dev] Done (exit: ${code})`));
+          console.log(chalk.green(`\n[auto-code-bot] Done (exit: ${code})`));
           resolve({ status: code === 0 ? "continue" : "error", output: "" });
         }
       });
@@ -84,7 +89,7 @@ export class OpenCodeClient extends EventEmitter {
         if (!settled) {
           settled = true;
           this.process = null;
-          console.error(chalk.red(`\n[auto-dev] Error: ${err.message}`));
+          console.error(chalk.red(`\n[auto-code-bot] Error: ${err.message}`));
           resolve({ status: "error", output: err.message });
         }
       });
@@ -99,9 +104,10 @@ export class OpenCodeClient extends EventEmitter {
   }
 }
 
-export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean): OpenCodeClient {
+export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string): OpenCodeClient {
   return new OpenCodeClient({
     cwd: path.resolve(projectDir),
+    workspace,
     model,
     agent,
     ulw,

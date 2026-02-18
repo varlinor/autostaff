@@ -2,35 +2,40 @@
 
 ## 方案概述
 
-使用 pnpm workspace 实现多包发布：
-- `auto-dev` — CLI 包
-- `auto-dev-mcp` — MCP 服务包
-- 共用同一套核心逻辑
+使用 pnpm workspace + changesets 实现多包发布：
+- `auto-code-bot` — CLI 包
+- `auto-code-mcp` — MCP 服务包
+- 使用 catalog 统一管理依赖版本
+
+---
 
 ## 目录结构
 
 ```
-auto-bot/
-├── pnpm-workspace.yaml
-├── package.json                    # 根：workspace 编排
+auto-code-bot/
+├── pnpm-workspace.yaml              # 工作区 + catalog 配置
+├── package.json                      # 根：workspace 编排 + changesets
+├── tsconfig.json                     # TypeScript 项目引用
+├── .changeset/
+│   └── config.json                   # changesets 配置
+├── docs/
+│   └── multi-package-publishing.md  # 本文档
 ├── packages/
-│   ├── auto-dev/                 # CLI 包
+│   ├── cli/                         # CLI 包
+│   │   ├── package.json             # name: "auto-code-bot"
+│   │   ├── tsconfig.json
 │   │   ├── src/
-│   │   │   ├── agent.ts
-│   │   │   ├── client.ts
-│   │   │   ├── progress.ts
-│   │   ├── prompts.ts
-│   │   └── security.ts
-│   ├── package.json            # name: "auto-dev"
-│   └── dist/
-│   └── prompts/               # 模板文件
-└── packages/
-    └── auto-dev-mcp/            # MCP 包
-        ├── src/
-        │   └── mcp-server.ts    # MCP 入口
-        ├── package.json        # name: "auto-dev-mcp", depends: "auto-dev"
-        └── dist/
+│   │   └── dist/
+│   └── mcp/                         # MCP 包
+│       ├── package.json             # name: "auto-code-mcp"
+│       ├── tsconfig.json
+│       └── src/
+└── prompts/                         # 模板文件
+    ├── AGENTS.md
+    └── app_spec.md
 ```
+
+---
 
 ## 配置文件
 
@@ -38,87 +43,163 @@ auto-bot/
 
 ```yaml
 packages:
-  - 'packages/*'
+  - "packages/*"
+
+catalog:
+  chalk: ^5.3.0
+  commander: ^12.1.0
+  ora: ^8.1.0
+  "@types/node": ^22.10.0
+  tsx: ^4.19.0
+  typescript: ^5.7.0
 ```
 
 ### 根 package.json
 
 ```json
 {
-  "name": "auto-dev-workspace",
+  "name": "@varlinor/code-bot-toolkit",
   "private": true,
+  "version": "0.1.0",
   "scripts": {
     "build": "pnpm -r run build",
-    "dev": "pnpm -r --parallel run dev",
-    "lint": "pnpm -r run lint"
+    "build:cli": "pnpm --filter auto-code-bot run build",
+    "build:mcp": "pnpm --filter auto-code-mcp run build",
+    "dev": "pnpm -r run dev",
+    "dev:cli": "pnpm --filter auto-code-bot run dev",
+    "dev:mcp": "pnpm --filter auto-code-mcp run dev",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "publish": "changeset publish"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "@changesets/cli": "^2.27.0"
   }
 }
 ```
 
-### packages/auto-dev/package.json
+### packages/cli/package.json
 
 ```json
 {
-  "name": "auto-dev",
-  "version": "1.0.0",
+  "name": "auto-code-bot",
+  "version": "0.1.2",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/auto-dev.js",
   "bin": {
-    "auto-dev": "./dist/auto-dev.js"
+    "auto-code-bot": "dist/auto-dev.js"
   },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./agent": "./dist/agent.js",
-    "./client": "./dist/client.js"
+  "dependencies": {
+    "chalk": "catalog:",
+    "commander": "catalog:",
+    "ora": "catalog:"
   },
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w"
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }
 ```
 
-### packages/auto-dev-mcp/package.json
+### packages/mcp/package.json
 
 ```json
 {
-  "name": "auto-dev-mcp",
-  "version": "1.0.0",
+  "name": "auto-code-mcp",
+  "version": "0.1.0",
   "type": "module",
-  "main": "./dist/mcp-server.js",
-  "dependencies": {
-    "auto-dev": "workspace:*"
-  },
+  "main": "src/index.js",
   "scripts": {
-    "build": "tsc"
-  }
+    "dev": "echo 'MCP dev server'",
+    "build": "echo 'No build required'"
+  },
+  "keywords": ["ai", "agent", "mcp", "model-context-protocol"]
 }
 ```
 
-## 构建与发布
+---
+
+## changesets 配置
+
+### 初始化
 
 ```bash
+pnpm install
+pnpm changeset init
+```
+
+### .changeset/config.json
+
+```json
+{
+  "$schema": "https://unpkg.com/@changesets/config@2.27.0/schema.json",
+  "changelog": "@changesets/changelog-github",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch"
+}
+```
+
+---
+
+## 构建与发布流程
+
+### 开发
+
+```bash
+# 安装依赖
+pnpm install
+
 # 构建所有包
 pnpm build
 
-# 开发模式（监听）
-pnpm dev
+# 开发 CLI
+pnpm dev:cli
 
-# 发布 CLI 包
-cd packages/auto-dev
+# 开发 MCP
+pnpm dev:mcp
+```
+
+### 版本管理
+
+```bash
+# 1. 创建版本变更
+pnpm changeset
+
+# 2. 选择要发布的包和版本类型
+#    - patch: 补丁版本 (0.1.0 -> 0.1.1)
+#    - minor: 次版本 (0.1.0 -> 0.2.0)
+#    - major: 主版本 (0.1.0 -> 1.0.0)
+
+# 3. 更新版本号
+pnpm changeset version
+
+# 4. 发布到 npm
+pnpm changeset publish
+```
+
+### 单独发布
+
+```bash
+# 发布 CLI
+cd packages/cli
 npm publish
 
-# 发布 MCP 包
-cd packages/auto-dev-mcp
+# 发布 MCP
+cd packages/mcp
 npm publish
 ```
+
+---
 
 ## MCP 配置
 
@@ -127,10 +208,28 @@ npm publish
 ```json
 {
   "mcpServers": {
-    "auto-dev": {
+    "auto-code-bot": {
       "command": "node",
-      "args": ["path/to/auto-dev-mcp/dist/mcp-server.js"]
+      "args": ["path/to/auto-code-bot/packages/mcp/dist/index.js"]
     }
   }
 }
 ```
+
+---
+
+## 命令汇总
+
+| 命令 | 说明 |
+|------|------|
+| `pnpm install` | 安装依赖 |
+| `pnpm build` | 构建所有包 |
+| `pnpm build:cli` | 构建 CLI |
+| `pnpm build:mcp` | 构建 MCP |
+| `pnpm dev:cli` | 开发 CLI |
+| `pnpm dev:mcp` | 开发 MCP |
+| `pnpm lint` | 检查所有包 |
+| `pnpm clean` | 清理所有包 |
+| `pnpm changeset` | 创建版本变更 |
+| `pnpm changeset version` | 更新版本号 |
+| `pnpm changeset publish` | 发布所有包 |

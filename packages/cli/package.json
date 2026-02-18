@@ -1,0 +1,40 @@
+{
+  "name": "auto-code-bot",
+  "version": "0.1.2",
+  "description": "Fully autonomous coding system with long-running agent harness",
+  "type": "module",
+  "main": "dist/auto-dev.js",
+  "bin": {
+    "auto-code-bot": "dist/auto-dev.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/auto-dev.ts",
+    "start": "node dist/auto-dev.js",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "chalk": "catalog:",
+    "commander": "catalog:",
+    "ora": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/varlinor/code-bot"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "coding",
+    "opencode",
+    "developer-tools"
+  ],
+  "license": "MIT"
+}

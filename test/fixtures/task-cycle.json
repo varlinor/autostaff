@@ -1,0 +1,28 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "category": "functional",
+      "description": "Task 1",
+      "dependsOn": ["task-3"],
+      "steps": ["Step 1"],
+      "passes": false
+    },
+    {
+      "id": "task-2",
+      "category": "functional",
+      "description": "Task 2",
+      "dependsOn": ["task-1"],
+      "steps": ["Step 2"],
+      "passes": false
+    },
+    {
+      "id": "task-3",
+      "category": "functional",
+      "description": "Task 3",
+      "dependsOn": ["task-2"],
+      "steps": ["Step 3"],
+      "passes": false
+    }
+  ]
+}

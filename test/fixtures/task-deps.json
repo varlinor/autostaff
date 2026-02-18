@@ -1,0 +1,28 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "category": "functional",
+      "description": "Setup database",
+      "dependsOn": [],
+      "steps": ["Init DB"],
+      "passes": false
+    },
+    {
+      "id": "task-2",
+      "category": "functional",
+      "description": "Create API",
+      "dependsOn": ["task-1"],
+      "steps": ["Create API endpoints"],
+      "passes": false
+    },
+    {
+      "id": "task-3",
+      "category": "functional",
+      "description": "Create frontend",
+      "dependsOn": ["task-2"],
+      "steps": ["Create frontend"],
+      "passes": false
+    }
+  ]
+}

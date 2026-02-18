@@ -1,0 +1,34 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "type": "package",
+      "workspace": "packages/shared-ui",
+      "category": "functional",
+      "description": "Create shared UI button component",
+      "dependsOn": [],
+      "steps": ["Create Button.tsx"],
+      "passes": false
+    },
+    {
+      "id": "task-2",
+      "type": "package",
+      "workspace": "packages/utils",
+      "category": "functional",
+      "description": "Create utility functions",
+      "dependsOn": [],
+      "steps": ["Create format.ts"],
+      "passes": false
+    },
+    {
+      "id": "task-3",
+      "type": "app",
+      "workspace": "apps/web",
+      "category": "functional",
+      "description": "Build web application",
+      "dependsOn": ["task-1", "task-2"],
+      "steps": ["Create App.tsx"],
+      "passes": false
+    }
+  ]
+}

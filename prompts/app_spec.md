@@ -94,9 +94,26 @@ When generating task.json, each task MUST include verification steps:
 ```jsonc
 [
   {
-    "id": 1,
+    "id": "task-1",
+    "type": "package",
+    "workspace": "packages/shared-ui",
+    "category": "functional",
+    "description": "Create shared UI button component",
+    "dependsOn": [],
+    "steps": [
+      "1. Create packages/shared-ui/src/Button.tsx",
+      "2. Export Button component as named export",
+      "3. Add TypeScript types",
+      "4. VERIFY: npm run build succeeds with no errors in packages/shared-ui"
+    ],
+    "passes": false
+  },
+  {
+    "id": "task-2",
+    "type": "app",
     "category": "functional",
     "description": "User can create a new task and see it in the list",
+    "dependsOn": ["task-1"],
     "steps": [
       "1. Run npm run dev to start the development server",
       "2. Open http://localhost:5173 in browser",
@@ -112,6 +129,8 @@ When generating task.json, each task MUST include verification steps:
   }
 ]
 ```
+
+**Multi-package projects:** Use `type: "package"` for workspace packages and `type: "app"` for applications. Use `dependsOn` to declare task dependencies.
 
 **CRITICAL**: Every task's steps[] MUST include "VERIFY:" prefixed steps.
 Never mark a task as passes:true without performing and confirming all verification steps.
