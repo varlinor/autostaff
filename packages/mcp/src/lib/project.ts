@@ -377,3 +377,86 @@ export function runOneTask(
     };
   }
 }
+
+export interface RunFullLoopOptions {
+  model?: string;
+  ulw?: boolean;
+  agent?: string;
+  maxIterations?: number;
+  extend?: boolean;
+  packageManager?: string;
+  gitBranch?: string;
+}
+
+export function runFullLoop(
+  projectDir: string,
+  options: RunFullLoopOptions = {}
+): { success: boolean; message: string; pid?: number } {
+  const resolvedDir = path.resolve(projectDir);
+  
+  const phase = detectPhase(resolvedDir);
+  if (phase === "need-spec") {
+    return {
+      success: false,
+      message: `Project needs app_spec.md. Create docs/app_spec.md first, then run auto_dev_start.`
+    };
+  }
+  
+  if (phase === "need-tasks") {
+    return {
+      success: false,
+      message: `Project has app_spec.md but needs task.json. Run auto_dev_run_one_task first to generate task.json, or manually create it.`
+    };
+  }
+
+  const model = options.model || DEFAULT_MODEL;
+  const ulwFlag = options.ulw ? "--ulw" : "";
+  const extendFlag = options.extend ? "--extend" : "";
+  const maxIterFlag = options.maxIterations ? `--max-iterations ${options.maxIterations}` : "";
+  const agentFlag = options.agent ? `--agent "${options.agent}"` : "";
+  
+  const fullCommand = `opencode run --model "${model}" ${ulwFlag} ${extendFlag} ${maxIterFlag} ${agentFlag}`;
+
+  try {
+    const child = spawn(fullCommand, [], {
+      cwd: resolvedDir,
+      shell: true,
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: true,
+    });
+
+    child.stdout?.on("data", (data: Buffer) => {
+      process.stderr.write(data.toString());
+    });
+    
+    child.stderr?.on("data", (data: Buffer) => {
+      process.stderr.write(data.toString());
+    });
+
+    child.on("error", (err: Error) => {
+      process.stderr.write(`Error spawning opencode: ${err.message}\n`);
+    });
+
+    child.unref();
+
+    return {
+      success: true,
+      message: `Started full automation loop for: ${resolvedDir}
+
+Model: ${model}
+ULW: ${options.ulw ? "enabled" : "disabled"}
+Extend: ${options.extend ? "enabled" : "disabled"}
+Max Iterations: ${options.maxIterations || "unlimited"}
+
+PID: ${child.pid}
+
+Poll auto_dev_status to track progress.`,
+      pid: child.pid
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Failed to start automation: ${error instanceof Error ? error.message : String(error)}`
+    };
+  }
+}

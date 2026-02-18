@@ -100,7 +100,7 @@
         "5. VERIFY: pnpm build:mcp succeeds with exit code 0",
         "6. VERIFY: After calling auto_dev_start, auto_dev_status reflects in-progress or completed status"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-publish-1",

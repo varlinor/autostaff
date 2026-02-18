@@ -8,9 +8,10 @@
 - task-cli-1: Verify CLI package is working with all parameters ✅
 - task-mcp-2: Implement auto_dev_status Tool and Resources ✅
 - task-mcp-3: Implement auto_dev_run_one_task Tool ✅
+- task-mcp-4: Implement auto_dev_start Tool ✅
 
 ### In Progress
-- task-mcp-4: Implement auto_dev_start Tool
+- (none - awaiting task-publish-1 or task-docs-1)
 
 ### Pending
 - task-publish-1: Verify multi-package build and publish workflow
@@ -23,4 +24,5 @@
 - Implemented auto_dev_status tool with phase detection and task parsing
 - Added Resources: task.json, progress.txt, app_spec.md
 - Implemented auto_dev_run_one_task tool - spawns opencode to execute one task
-- 5/8 tasks passing
+- Implemented auto_dev_start tool - non-blocking full automation loop
+- 6/8 tasks passing
