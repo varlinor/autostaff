@@ -31,7 +31,7 @@
         "4. VERIFY: pnpm build:cli succeeds with exit code 0",
         "5. VERIFY: CLI --help shows all expected parameters"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-mcp-1",

@@ -5,10 +5,10 @@
 ### Completed Tasks
 - task-mono-1: Verify pnpm workspace and mono-repo structure ✅
 - task-mcp-1: Implement MCP service entry point and stdio transport ✅
+- task-cli-1: Verify CLI package is working with all parameters ✅
 
 ### In Progress
-- task-cli-1: Verify CLI package is working (partial verification done)
-- task-mcp-2: Implement auto_dev_status Tool and Resources (blocked by task-mcp-1 completion)
+- task-mcp-2: Implement auto_dev_status Tool and Resources
 
 ### Pending
 - task-mcp-3: Implement auto_dev_run_one_task Tool
@@ -19,4 +19,5 @@
 ### Notes
 - MCP server now runs and listens on stdio
 - Build system works for both cli and mcp packages
-- 2/8 tasks passing
+- Fixed CLI config file path bug - was looking in wrong directory
+- 3/8 tasks passing
