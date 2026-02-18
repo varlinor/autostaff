@@ -1,0 +1,46 @@
+{
+  "name": "@varlinor/code-bot-toolkit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo for auto-code-bot CLI and MCP server",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "build:cli": "pnpm --filter auto-code-bot run build",
+    "build:mcp": "pnpm --filter auto-code-mcp run build",
+    "dev": "pnpm -r run dev",
+    "dev:cli": "pnpm --filter auto-code-bot run dev",
+    "dev:mcp": "pnpm --filter auto-code-mcp run dev",
+    "lint": "pnpm -r run lint",
+    "lint:cli": "pnpm --filter auto-code-bot run lint",
+    "lint:mcp": "pnpm --filter auto-code-mcp run lint",
+    "clean": "pnpm -r run clean",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "publish": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/varlinor/code-bot"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "coding",
+    "opencode",
+    "developer-tools",
+    "mcp"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
+}

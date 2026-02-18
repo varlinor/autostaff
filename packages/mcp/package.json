@@ -1,0 +1,36 @@
+{
+  "name": "auto-code-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for auto-code-bot",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "auto-code-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "mcp",
+    "model-context-protocol",
+    "opencode",
+    "developer-tools"
+  ],
+  "author": "",
+  "license": "MIT"
+}
