@@ -17,6 +17,37 @@ Step 2: 用 auto-code-bot 执行任务直到完成
 
 ---
 
+## 核心特性
+
+### 多模型支持
+- 支持 OpenAI、DeepSeek、MiniMax 等主流模型
+- 可通过命令行参数或配置文件灵活切换
+
+### 智能任务管理
+- 基于 `task.json` 的任务清单
+- 拓扑排序自动处理任务依赖
+- 支持断点续传，中断后自动恢复
+
+### 单包 & 多包工程支持
+- **单包工程**：直接处理，简单高效
+- **多包工程 (Monorepo)**：自动检测 `pnpm-workspace.yaml`，根据 `task.json` 中的 `workspace` 字段智能切换目录，跨多个包协作开发
+
+> ⚠️ 多包工程支持目前处于早期阶段，欢迎反馈问题与改进建议
+
+### 自动化测试与验证
+- 自动运行浏览器测试 (Playwright/Puppeteer)
+- TypeScript 类型检查
+- 构建验证
+
+### 规范化提交
+- 自动生成符合 Conventional Commits 格式的提交信息
+- 自动更新版本号与 Changelog
+
+### MCP 服务器集成
+- 提供 MCP 协议支持，可直接对接 Claude Desktop、Cursor 等 IDE
+
+---
+
 ## 目录结构
 
 ```

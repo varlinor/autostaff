@@ -4,9 +4,16 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec, runOneTask, getNextExecutableTask, runFullLoop } from "./lib/project.js";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
 const SERVER_NAME = "auto-code-bot";
-const SERVER_VERSION = "0.1.0";
+const SERVER_VERSION = packageJson.version;
 
 function createServer(): McpServer {
   const server = new McpServer({

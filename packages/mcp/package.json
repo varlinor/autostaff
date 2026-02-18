@@ -1,6 +1,6 @@
 {
   "name": "auto-code-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for auto-code-bot",
   "type": "module",
   "main": "dist/index.js",
@@ -15,8 +15,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "zod": "^3.24.0"
+    "@modelcontextprotocol/sdk": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -31,6 +31,6 @@
     "opencode",
     "developer-tools"
   ],
-  "author": "",
+  "author": "varlinor",
   "license": "MIT"
 }
