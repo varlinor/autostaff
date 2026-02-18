@@ -118,7 +118,7 @@
         "6. VERIFY: pnpm build:cli succeeds with exit code 0",
         "7. VERIFY: pnpm build:mcp succeeds with exit code 0"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-docs-1",
@@ -131,9 +131,9 @@
         "1. Update README.md or docs/ with MCP configuration example for Cursor/Claude",
         "2. Document how to install and configure auto-code-mcp",
         "3. Document the Tools and Resources available in MCP",
-        "4. VERIFY: Documentation includes correct MCP configuration JSON example"
+"4. VERIFY: Documentation includes correct MCP configuration JSON example"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

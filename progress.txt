@@ -9,13 +9,14 @@
 - task-mcp-2: Implement auto_dev_status Tool and Resources ✅
 - task-mcp-3: Implement auto_dev_run_one_task Tool ✅
 - task-mcp-4: Implement auto_dev_start Tool ✅
+- task-publish-1: Verify multi-package build and publish workflow ✅
+- task-docs-1: Update documentation with MCP configuration instructions ✅
 
 ### In Progress
-- (none - awaiting task-publish-1 or task-docs-1)
+- (none - all tasks complete!)
 
 ### Pending
-- task-publish-1: Verify multi-package build and publish workflow
-- task-docs-1: Update documentation with MCP configuration instructions
+- (none - all tasks complete!)
 
 ### Notes
 - MCP server now runs and listens on stdio
@@ -25,4 +26,7 @@
 - Added Resources: task.json, progress.txt, app_spec.md
 - Implemented auto_dev_run_one_task tool - spawns opencode to execute one task
 - Implemented auto_dev_start tool - non-blocking full automation loop
-- 6/8 tasks passing
+- Fixed changeset baseBranch from "main" to "develop" (branch doesn't exist)
+- Added MCP documentation (docs/mcp.md) with configuration examples
+- Updated README.md with MCP section and link to docs/mcp.md
+- 8/8 tasks passing - all complete!
