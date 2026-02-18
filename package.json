@@ -19,7 +19,7 @@
     "test:watch": "vitest",
     "changeset": "changeset",
     "version": "changeset version",
-    "publish": "changeset publish"
+    "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
