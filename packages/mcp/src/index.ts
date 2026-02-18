@@ -1,61 +1,148 @@
 #!/usr/bin/env node
 
-/**
- * MCP Server for auto-code-bot
- * 
- * Provides tools and resources for interacting with auto-code-bot projects
- * via the Model Context Protocol (MCP).
- * 
- * Usage:
- *   npx tsx src/index.ts           # Development
- *   node dist/index.js             # Production
- */
-
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec } from "./lib/project.js";
 
 const SERVER_NAME = "auto-code-bot";
 const SERVER_VERSION = "0.1.0";
 
-/**
- * Create and configure the MCP server
- */
 function createServer(): McpServer {
   const server = new McpServer({
     name: SERVER_NAME,
     version: SERVER_VERSION,
   });
 
-  // Tool: ping - Simple health check tool
   server.tool(
-    "ping",
-    { message: z.string().optional() },
-    async ({ message }) => {
-      const response = message || "pong";
+    "auto_dev_status",
+    { 
+      project_dir: z.string().describe("Project directory path (absolute or relative)") 
+    },
+    async ({ project_dir }) => {
+      try {
+        const status = getProjectStatus(project_dir);
+        
+        let categorySummary = "";
+        for (const [cat, stats] of Object.entries(status.categories)) {
+          const pct = stats.total > 0 ? ((stats.passing / stats.total) * 100).toFixed(0) : "0";
+          categorySummary += `\n  - ${cat}: ${stats.passing}/${stats.total} (${pct}%)`;
+        }
+        
+        let progressText = "";
+        if (status.progressSummary) {
+          const lines = status.progressSummary.split("\n").slice(0, 10);
+          progressText = "\n\nRecent progress:\n" + lines.join("\n");
+        }
+        
+        const response = `Project Status for: ${project_dir}
+
+Phase: ${status.phase}
+Progress: ${status.passing}/${status.total} tasks passing${categorySummary}${progressText}
+
+Phase explanation:
+- need-spec: Project needs app_spec.md
+- need-tasks: Project has app_spec.md but needs task.json
+- execute: Project has task.json, ready to execute tasks`;
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: response,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error getting project status: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  server.resource(
+    "task-json",
+    "project://{project_dir}/task.json",
+    async (uri) => {
+      const project_dir = uri.searchParams.get("project_dir") || ".";
+      const content = readTaskJson(project_dir);
+      
+      if (!content) {
+        return {
+          contents: [{
+            uri: uri.href,
+            mimeType: "application/json",
+            text: "Task file not found"
+          }]
+        };
+      }
+      
       return {
-        content: [
-          {
-            type: "text",
-            text: response,
-          },
-        ],
+        contents: [{
+          uri: uri.href,
+          mimeType: "application/json",
+          text: content
+        }]
       };
     }
   );
 
-  // Tool: echo - Echo back the input (for testing)
-  server.tool(
-    "echo",
-    { text: z.string() },
-    async ({ text }) => {
+  server.resource(
+    "progress-txt",
+    "project://{project_dir}/progress.txt",
+    async (uri) => {
+      const project_dir = uri.searchParams.get("project_dir") || ".";
+      const content = readProgressNotes(project_dir);
+      
+      if (!content) {
+        return {
+          contents: [{
+            uri: uri.href,
+            mimeType: "text/plain",
+            text: "Progress file not found"
+          }]
+        };
+      }
+      
       return {
-        content: [
-          {
-            type: "text",
-            text: `Echo: ${text}`,
-          },
-        ],
+        contents: [{
+          uri: uri.href,
+          mimeType: "text/plain",
+          text: content
+        }]
+      };
+    }
+  );
+
+  server.resource(
+    "app-spec",
+    "project://{project_dir}/app_spec.md",
+    async (uri) => {
+      const project_dir = uri.searchParams.get("project_dir") || ".";
+      const content = readAppSpec(project_dir);
+      
+      if (!content) {
+        return {
+          contents: [{
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text: "App spec file not found"
+          }]
+        };
+      }
+      
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: "text/markdown",
+          text: content
+        }]
       };
     }
   );

@@ -64,9 +64,9 @@
         "4. Implement Resource: project://{project_dir}/app_spec.md - read-only app_spec.md content",
         "5. Reuse CLI or core phase detection and task parsing logic",
         "6. VERIFY: pnpm build:mcp succeeds with exit code 0",
-        "7. VERIFY: In MCP client, calling auto_dev_status returns correct response matching target project files"
+"7. VERIFY: In MCP client, calling auto_dev_status returns correct response matching target project files"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-mcp-3",
