@@ -1,11 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.2/schema.json",
-  "changelog": "@changesets/changelog-github",
+  "changelog": ["@changesets/changelog-github", { "repo": "varlinor/code-bot" }],
   "commit": false,
   "fixed": [],
   "linked": [],
-  "access": "restricted",
+  "access": "public",
   "baseBranch": "develop",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": ["@varlinor/code-bot-toolkit"]
 }
