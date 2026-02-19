@@ -27,9 +27,12 @@ const SPEC_FILE = "app_spec.md";
 type Phase = "need-spec" | "need-tasks" | "execute";
 
 function detectPhase(dir: string): Phase {
-  const hasSpec = fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || fs.existsSync(path.join(dir, "app_spec.txt"));
+  const hasSpec = 
+    fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || 
+    fs.existsSync(path.join(dir, "app_spec.txt"));
   const hasTasks = fs.existsSync(path.join(dir, "task.json"));
 
+  if (!hasSpec && hasTasks) return "execute";
   if (!hasSpec) return "need-spec";
   if (!hasTasks) return "need-tasks";
   return "execute";

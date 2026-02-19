@@ -1,72 +1,71 @@
-# auto-dev Roadmap
+# auto-code-bot Roadmap
 
 ## 版本历程
 
-### v0.1.0 (当前版本)
+### v0.1.0 ✅ 已完成
+
+**目标：基础功能**
 
 **已完成功能**：
 
 - [x] 三阶段自动检测：need-spec → need-tasks → execute
-- [x] app_spec.md 模板 + 生成规则
+- [x] app_spec.md 模板 + 生成规则（skills/app-spec-generator.md）
 - [x] task.json 生成（JSONC 格式，支持 passes 字段）
 - [x] Conventional Commits 提交规范
 - [x] Git 分支策略（develop 分支）
 - [x] 包管理器支持（pnpm/yarn/bun/npm 自动检测）
 - [x] 测试验证清单（browser 测试要求）
 - [x] 代码质量门槛（commit 前检查）
-- [x] 分拆工作流（app_spec 与执行分离）
 
 **使用流程**：
 ```
-1. 单独生成 app_spec.md（用 opencode/cursor/Claude）
-2. 执行 auto-bot 自动完成任务
+1. 生成 app_spec.md（使用 app-spec-generator skill）
+2. 生成 task.json（auto-code-bot --init-only）
+3. 审核 task.json（使用 task-auditor skill）
+4. 执行任务（auto-code-bot --ulw）
 ```
 
 ---
 
-## v0.2.0 (规划中)
+### v0.2.0 ✅ 已完成
 
-### 目标：支持 Workspace/Monorepo
+**目标：Monorepo 支持 + MCP 服务 + 阶段性工作流**
 
-**核心改动**：
+#### Monorepo 支持
 
-```markdown
-## Build Order (新增)
+- [x] task.json 支持 `type` 字段（package/app）
+- [x] task.json 支持 `workspace` 字段（多包工作区）
+- [x] task.json 支持 `dependsOn` 依赖声明
+- [x] 自动拓扑排序执行顺序（progress.ts topologicalSort）
+- [x] pnpm workspace 检测（workspace.ts detectProjectType）
 
-构建顺序声明：
-1. packages/shared-ui    # 先构建共享包
-2. packages/utils
-3. apps/dashboard      # 再构建应用
-4. apps/admin
-```
+#### MCP 服务
 
-```jsonc
-// task.json 新增字段
-{
-  "tasks": [
-    {
-      "id": "pkg-shared-ui",
-      "type": "package",        // package | app
-      "workspace": "packages/shared-ui",
-      "dependsOn": [],        // 依赖的任务 ID
-      "steps": [...],
-      "passes": false
-    }
-  ]
-}
-```
+- [x] MCP 协议兼容（stdio 传输）
+- [x] auto_dev_status 工具
+- [x] auto_dev_run_one_task 工具
+- [x] auto_dev_start 工具
+- [x] task.json 资源
+- [x] progress.txt 资源
+- [x] app_spec 资源
 
-**实现要点**：
-- [ ] task.json 支持 `type` 字段（package/app）
-- [ ] task.json 支持 `dependsOn` 依赖声明
-- [ ] auto-bot 自动拓扑排序执行顺序
-- [ ] 支持 pnpm workspace 检测
+#### 阶段性工作流
+
+- [x] `--init-only` 参数（仅生成 app_spec + task.json）
+- [x] Phase 检测优化（支持 task.json 存在时跳过 app_spec）
+- [x] task-auditor skill（task.json 审核）
+
+#### 文档
+
+- [x] docs/workflow.md 工作流指南
+- [x] docs/mcp.md MCP 配置指南
+- [x] skills/task-auditor.md
 
 ---
 
-## v0.3.0 (规划中)
+### v0.3.0 🔄 规划中
 
-### 目标：多应用编排
+**目标：多应用编排**
 
 **场景**：
 - 一个仓库包含多个独立 web 应用
@@ -79,55 +78,43 @@
 
 ---
 
-## v0.4.0 (规划中)
+### v1.0.0 🔄 规划中
 
-### 目标：多包发布（CLI + MCP）
+**目标：完整愿景**
 
-**两包结构**：
-```
-auto-bot/
-├── pnpm-workspace.yaml
-├── package.json              # 根：workspace 编排
-└── packages/
-    ├── auto-dev/            # CLI 包：当前所有逻辑
-    │   ├── src/
-    │   └── package.json    # name: "auto-dev"
-    └── auto-dev-mcp/       # MCP 包：调用 auto-dev 的 API
-        └── src/
-            └── mcp-server.ts
-        └── package.json    # name: "auto-dev-mcp", depends: "auto-dev"
-```
-
-**三包结构（可选）**：
-```
-packages/
-├── core/                    # 核心逻辑，可被 CLI/MCP/第三方引用
-├── cli/                    # CLI 入口，依赖 core
-└── mcp/                   # MCP 入口，依赖 core
-```
-
-**实现要点**：
-- [ ] pnpm-workspace.yaml 配置
-- [ ] 根 package.json 编排脚本
-- [ ] packages/auto-dev-mcp/ MCP 入口
-- [ ] 分别发布的配置
-
----
-
-## v1.0.0 (目标版本)
-
-### 完整愿景
-
-- [ ] 全功能 Monorepo 支持
-- [ ] 智能依赖拓扑排序
+**高级特性**：
 - [ ] 并行构建支持
 - [ ] 增量构建（只构建变更部分）
-- [ ] CLI + MCP 双端发布
+- [ ] 智能依赖拓扑排序（优化）
 
----
-
-## 技术债务
-
+**质量保障**：
 - [ ] 单元测试覆盖
 - [ ] E2E 测试
 - [ ] CI/CD 集成
+
+---
+
+## 当前项目结构
+
+```
+auto-code-bot/
+├── pnpm-workspace.yaml              ✅
+├── package.json                      ✅
+├── docs/                            ✅
+│   ├── app_spec.md
+│   ├── workflow.md
+│   ├── mcp.md
+│   ├── ROADMAP.md
+│   └── project_status.md
+├── packages/
+│   ├── cli/                         ✅ (auto-code-bot)
+│   │   ├── package.json            ✅ name: "auto-code-bot"
+│   │   └── src/
+│   └── mcp/                        ✅ (auto-code-mcp)
+│       ├── package.json            ✅ name: "auto-code-mcp"
+│       └── src/
+│           └── index.ts            ✅ MCP 入口
+└── skills/                          ✅
+    ├── app-spec-generator.md
+    └── task-auditor.md
+```

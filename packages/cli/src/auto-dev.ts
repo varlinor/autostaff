@@ -15,6 +15,7 @@ interface FileConfig {
   extend?: boolean;
   packageManager?: string;
   gitBranch?: string;
+  initOnly?: boolean;
 }
 
 const pkg = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
@@ -34,6 +35,7 @@ program
   .option("--spec <file>", "Copy spec file as app_spec.md")
   .option("--desc <text>", "Short description to generate app_spec.md")
   .option("-e, --extend", "Extend mode: add new features when all complete")
+  .option("--init-only", "Only generate app_spec.md and task.json, do not execute tasks")
   .option("--package-manager <npm|pnpm|yarn|bun>", "Package manager")
   .option("--git-branch <branch>", "Git branch for development", "develop")
   .action(async (projectDir: string, opts: any) => {
@@ -49,7 +51,7 @@ program
     const config = {
       model: opts.model || fileConfig.model,
       agent: opts.agent || fileConfig.agent,
-      maxIterations: opts.maxIterations || fileConfig.maxIterations,
+      maxIterations: opts.initOnly ? 2 : (opts.maxIterations || fileConfig.maxIterations),
       ulw: opts.ulw ?? fileConfig.ulw,
       specFile: opts.spec || fileConfig.spec,
       description: opts.desc || fileConfig.description,

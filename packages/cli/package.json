@@ -1,6 +1,6 @@
 {
   "name": "auto-code-bot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fully autonomous coding system with long-running agent harness",
   "type": "module",
   "main": "dist/auto-dev.js",
