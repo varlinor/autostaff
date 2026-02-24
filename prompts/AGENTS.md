@@ -75,6 +75,27 @@ If it doesn't, ADD verification steps now and perform them.
 - [ ] Verify expected result occurs
 - [ ] Take screenshot as proof
 
+**For monorepo projects (CRITICAL!):**
+When running build/type-check commands in a workspace subdirectory, you MUST run from the workspace ROOT, not the subdirectory:
+
+```bash
+# WRONG: Running from workspace subdirectory breaks pnpm symlinks
+cd apps/module-admin
+pnpm run build  # ❌ Cannot find local workspace packages like @varlinor/layout-base
+
+# CORRECT: Run from workspace root with --filter
+pnpm -r --filter @varlinor/module-admin run build
+
+# OR: Change to workspace root first
+cd <monorepo-root>
+pnpm run build
+```
+
+**Why this matters:**
+- pnpm workspace symlinks are created at the workspace root
+- Local packages like `@varlinor/layout-base` are linked from `node_modules/.pnpm`
+- Running build from subdirectories breaks these symlinks
+
 **For UI/Functional tasks:** Browser testing with Playwright/Puppeteer is MANDATORY.
 **For API/Logic tasks:** Test endpoints with curl or similar.
 

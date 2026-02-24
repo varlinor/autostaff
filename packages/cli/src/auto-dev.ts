@@ -58,6 +58,7 @@ program
       extend: opts.extend || fileConfig.extend,
       packageManager: opts.packageManager || fileConfig.packageManager,
       gitBranch: opts.gitBranch || fileConfig.gitBranch || "develop",
+      initOnly: opts.initOnly ?? fileConfig.initOnly,
     };
 
     const resolvedDir = path.resolve(projectDir);
@@ -74,6 +75,7 @@ program
         extend: config.extend,
         packageManager: config.packageManager,
         gitBranch: config.gitBranch,
+        initOnly: config.initOnly,
       });
     } catch (error: any) {
       if (error.code === "ERR_USE_AFTER_CLOSE" || error.message?.includes("interrupted")) {
