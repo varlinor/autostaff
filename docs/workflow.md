@@ -148,6 +148,25 @@ cd packages/cli
 npx tsx src/auto-dev.ts <project-dir> --ulw --model deepseek/deepseek-chat
 ```
 
+### 静默模式
+
+将 opencode 输出写入文件，减少控制台干扰：
+
+```bash
+cd packages/cli
+# 静默模式：opencode 输出写文件
+npx tsx src/auto-dev.ts <project-dir> --ulw --silent
+
+# 指定日志文件路径
+npx tsx src/auto-dev.ts <project-dir> --ulw --silent --log-file ./logs/bot.log
+```
+
+**说明**：
+- auto-bot 自身输出始终显示在控制台（实时进度）
+- opencode 子进程输出可选转文件（减少干扰）
+- 日志文件默认为项目目录下的 `auto-code-bot.log`
+- 日志带时间戳，便于问题排查
+
 ---
 
 ## task.json 质量标准

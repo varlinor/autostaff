@@ -156,7 +156,8 @@ npx tsx src/auto-dev.ts "D:\你的项目路径" --ulw --max-iterations 2
 | `--desc` | - | 描述生成规格 | - |
 | `--package-manager` | - | 包管理器 | npm |
 | `--git-branch` | - | Git 分支 | develop |
-
+| `--silent` | - | 静默模式：opencode 输出写文件 | 关闭 |
+| `--log-file` | - | 日志文件路径 | auto-code-bot.log |
 ---
 
 ## 工作流指南

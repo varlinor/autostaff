@@ -1,5 +1,16 @@
 # auto-code-bot
 
+## 0.3.0
+
+### Minor Changes
+
+- **Monorepo support**: Auto-detect workspace root and switch to correct subdirectory
+- **Exit code handling**: Improved detection with keyword fallback (PASS, SUCCESS, COMPLETE)
+- **One task per session**: Each task runs in independent opencode session
+- **Silent mode**: `--silent` flag to write opencode output to file
+- **Log file option**: `--log-file <path>` to specify custom log path
+- **Output separation**: auto-bot output always to console, opencode output optional to file
+
 ## 0.2.1
 
 ### Patch Changes

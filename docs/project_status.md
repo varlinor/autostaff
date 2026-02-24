@@ -1,6 +1,6 @@
 # Project Status - auto-code-bot
 
-> Last Updated: 2026-02-19
+> Last Updated: 2026-02-24
 
 ## Project Overview
 
@@ -9,7 +9,7 @@
 - CLI: `auto-code-bot`
 - MCP: `auto-code-mcp`
 **Repository**: https://github.com/varlinor/code-bot  
-**Current Version**: 0.2.0  
+**Current Version**: 0.2.1
 **License**: MIT
 
 基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念构建的全自动编程系统。通过 **opencode** 子进程驱动，跨多个上下文窗口持续增量开发，直到项目完成。
@@ -18,9 +18,9 @@
 
 ## Current Status
 
-### Phase: Production Ready (v0.2.0)
+### Phase: Production Ready (v0.2.1)
 
-项目已实现 **Monorepo 结构 + MCP 服务 + 阶段性工作流**，所有核心功能已实现并通过测试。
+项目已实现 **Monorepo 结构 + MCP 服务 + 阶段性工作流 + 静默模式**，所有核心功能已实现并通过测试。
 
 ### Build Status
 
@@ -185,6 +185,8 @@ Phase 4: 执行任务 (--ulw)
 | `--extend` | `-e` | Extend mode | false |
 | `--package-manager` | - | npm/pnpm/yarn/bun | config / npm |
 | `--git-branch` | - | Git branch | config / develop |
+| `--silent` | - | Silent mode: opencode output to file only | false |
+| `--log-file` | - | Log file path | auto-code-bot.log |
 
 ---
 
@@ -327,3 +329,58 @@ npx tsx src/auto-dev.ts ./my-project --ulw --max-iterations 3
 - Uses Conventional Commits for git commit messages
 - Monorepo structure enables independent versioning of CLI and MCP packages
 - Recommended workflow: generate spec → generate tasks → audit tasks → execute
+
+---
+
+## Session History
+
+### 2026-02-24 Session
+
+**Completed Tasks**:
+
+1. **v0.2.1 发布**: 成功发布 auto-code-bot@0.2.1 和 auto-code-mcp@0.2.1 到 npm
+
+2. **--init-only 修复**: 修复 `--init-only` 参数无效问题
+   - 添加 `initOnly` 到 `AgentConfig` 接口
+   - 在 `runAutonomousAgent` 中添加 early return 逻辑
+   - 修复 `maxIterations` 检查逻辑（`>` 改为 `>=`）
+
+3. **Monorepo 支持**: 修复多包工程中 packages 目录查找问题
+   - 添加 `findWorkspaceRoot()` 函数检测工作区根目录
+   - 在 agent message 中添加 MONOREPO DETECTED 提示
+   - 更新 AGENTS.md 添加 monorepo build 指令
+
+4. **Workspace 切换修复**: 修复 pnpm workspace 本地包找不到问题
+   - 修复 `createClient` 调用时未传递 `workspace` 参数的问题
+   - 确保 opencode 在正确的 workspace 子目录中执行
+
+5. **退出码处理改进**: 改进退出码检测逻辑
+   - 添加 `checkSuccess()` 函数检测任务完成状态
+   - 检测关键词：`TASK COMPLETE`、`DONE`、`COMPLETE`、`PASS`、`SUCCESS`
+   - 先检查 exitCode === 0，再检查关键词作为 fallback
+
+6. **每个任务一个 opencode 会话**: 确保每个任务独立执行
+   - 在 agent message 中添加明确指令：`Complete EXACTLY ONE task, then exit cleanly`
+
+7. **静默模式实现**: 实现 `--silent` 和 `--log-file` 参数
+   - 添加 `--silent` 参数
+   - 添加 `--log-file <path>` 参数
+   - **分离输出**：auto-bot 输出始终控制台，opencode 输出可选文件
+
+8. **ROADMAP 更新**: 标记 v0.3.0 和 v0.4.0 为已完成
+   - v0.3.0: 多应用编排（通过 workspace 实现）
+   - v0.4.0: 日志输出控制（通过 --silent 实现）
+
+**Git Commits**:
+```
+d3bc374 release: v0.2.1
+15819a5 fix: add monorepo workspace root detection
+959cccb fix: enforce one task per opencode session
+55e3a6a fix: improve exit code handling to detect task completion
+1109d0b fix: check exit code 0 first, then keywords as fallback
+5dbdc12 fix: add PASS and SUCCESS keywords for build output detection
+fdacd54 feat: add --silent mode for log file output
+64f46a8 fix: separate auto-bot and opencode output in silent mode
+```
+
+**Current State**: All requested features implemented and verified.
