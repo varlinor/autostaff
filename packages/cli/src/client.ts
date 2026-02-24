@@ -70,16 +70,12 @@ export class OpenCodeClient extends EventEmitter {
 
       const log = (text: string) => {
         this.writeToLog(text);
-        if (!this.options.silent) {
-          console.log(text);
-        }
+        console.log(text);
       };
 
       const logError = (text: string) => {
         this.writeToLog(text);
-        if (!this.options.silent) {
-          console.error(text);
-        }
+        console.error(text);
       };
 
       log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
@@ -110,6 +106,7 @@ export class OpenCodeClient extends EventEmitter {
       this.process.stdout?.on("data", (data) => {
         const text = data.toString();
         this.outputBuffer += text;
+        this.writeToLog(text);
         if (!this.options.silent) {
           process.stdout.write(text);
         }
@@ -117,6 +114,7 @@ export class OpenCodeClient extends EventEmitter {
 
       this.process.stderr?.on("data", (data) => {
         const text = data.toString();
+        this.writeToLog(text);
         if (!text.includes("Debugger") && !text.includes("ExperimentalWarning")) {
           if (!this.options.silent) {
             process.stderr.write(text);
