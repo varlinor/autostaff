@@ -377,13 +377,16 @@ If NOT on 'develop' branch, run: git checkout -b develop${monorepoNote}
 Read AGENTS.md for the complete workflow, then follow it exactly.
 Read task.json and pick the next incomplete task (passes:false).
 ${taskInfo}
-Implement it, test it, update task.json (only change passes:false to passes:true).
-CRITICAL: After completing and verifying a task, you MUST:
+
+CRITICAL: Complete EXACTLY ONE task, then exit cleanly.
+Do NOT attempt multiple tasks in one session.
+After completing and verifying a task, you MUST:
   1. git checkout develop (ensure on develop branch)
   2. git add .
   3. git commit -m "[Task #X] description - completed and verified"
   4. Update progress.txt with what was done
-Do NOT skip the commit step - it records progress for future sessions.`;
+  5. Say "TASK COMPLETE" and exit cleanly
+Do NOT continue to the next task - the outer loop will handle that.`;
     }
 
     const result = await client.run(msg);
