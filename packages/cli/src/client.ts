@@ -86,7 +86,9 @@ export class OpenCodeClient extends EventEmitter {
         
         if (upperOutput.includes("TASK COMPLETE") || 
             upperOutput.includes("DONE") ||
-            upperOutput.includes("COMPLETE")) {
+            upperOutput.includes("COMPLETE") ||
+            upperOutput.includes("PASS") ||
+            upperOutput.includes("SUCCESS")) {
           return "continue";
         }
         
