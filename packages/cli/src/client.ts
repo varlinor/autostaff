@@ -80,13 +80,13 @@ export class OpenCodeClient extends EventEmitter {
       const checkSuccess = (exitCode: number | null): "continue" | "error" => {
         const upperOutput = outputBuffer.toUpperCase();
         
-        if (upperOutput.includes("TASK COMPLETE") || 
-            upperOutput.includes("DONE") ||
-            upperOutput.includes("COMPLETE")) {
+        if (exitCode === 0) {
           return "continue";
         }
         
-        if (exitCode === 0) {
+        if (upperOutput.includes("TASK COMPLETE") || 
+            upperOutput.includes("DONE") ||
+            upperOutput.includes("COMPLETE")) {
           return "continue";
         }
         
