@@ -1,4 +1,11 @@
-# auto-code-mcp
+# auto-code-mcp CHANGELOG
+
+## 0.3.0
+
+### Minor Changes
+
+- **Workspace support**: Enhanced multi-package project support
+- **Improved phase detection**: Better handling of task.json precedence
 
 ## 0.2.1
 
