@@ -62,10 +62,11 @@
 - [x] skills/task-auditor.md
 
 ---
-
 ### v0.3.0 ✅ 已完成
 
-**目标：多应用编排**
+**目标：多应用编排 + 日志与输出控制**
+
+#### 多应用编排
 
 **设计理念**：
 - 通过 task.json 的 workspace 字段实现子应用切换
@@ -77,11 +78,10 @@
 - [x] 自动切换工作目录（getEffectiveDir + createClient）
 - [x] 多子应用任务调度（workspace 切换机制）
 - [x] 应用间依赖关系（dependsOn 拓扑排序）
----
+- [x] pnpm workspace 根目录检测（findWorkspaceRoot）
+- [x] 每个任务独立 opencode 会话
 
-### v0.4.0 ✅ 已完成
-
-**目标：日志与输出控制**
+#### 日志与输出控制
 
 **设计理念**：
 - auto-bot 自身输出始终显示控制台（实时进度）
@@ -93,6 +93,7 @@
 - [x] 分离 auto-bot 与 opencode 输出
 - [x] 时间戳日志格式
 ---
+### v1.0.0 🔄 规划中
 
 ### v1.0.0 🔄 规划中
 
