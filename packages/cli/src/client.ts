@@ -37,6 +37,7 @@ export class OpenCodeClient extends EventEmitter {
     return new Promise((resolve) => {
       let settled = false;
       let timeoutId: NodeJS.Timeout;
+      let outputBuffer = "";
 
       console.log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
       console.log(chalk.cyan("[auto-code-bot] Starting opencode...\n"));
@@ -64,7 +65,9 @@ export class OpenCodeClient extends EventEmitter {
       }, SESSION_TIMEOUT_MS);
 
       this.process.stdout?.on("data", (data) => {
-        process.stdout.write(data.toString());
+        const text = data.toString();
+        outputBuffer += text;
+        process.stdout.write(text);
       });
 
       this.process.stderr?.on("data", (data) => {
@@ -74,13 +77,30 @@ export class OpenCodeClient extends EventEmitter {
         }
       });
 
+      const checkSuccess = (exitCode: number | null): "continue" | "error" => {
+        const upperOutput = outputBuffer.toUpperCase();
+        
+        if (upperOutput.includes("TASK COMPLETE") || 
+            upperOutput.includes("DONE") ||
+            upperOutput.includes("COMPLETE")) {
+          return "continue";
+        }
+        
+        if (exitCode === 0) {
+          return "continue";
+        }
+        
+        return "error";
+      };
+
       this.process.on("close", (code) => {
         clearTimeout(timeoutId);
         if (!settled) {
           settled = true;
           this.process = null;
-          console.log(chalk.green(`\n[auto-code-bot] Done (exit: ${code})`));
-          resolve({ status: code === 0 ? "continue" : "error", output: "" });
+          const status = checkSuccess(code);
+          console.log(chalk.green(`\n[auto-code-bot] Done (exit: ${code}) - status: ${status}`));
+          resolve({ status, output: outputBuffer });
         }
       });
 
