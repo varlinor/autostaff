@@ -20,6 +20,8 @@ export interface AgentConfig {
   packageManager?: string;
   gitBranch?: string;
   initOnly?: boolean;
+  silent?: boolean;
+  logFile?: string;
 }
 
 const SPEC_DIR = "docs";
@@ -40,7 +42,7 @@ function detectPhase(dir: string): Phase {
 }
 
 export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
-  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend, initOnly } = config;
+  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend, initOnly, silent, logFile } = config;
   const effectiveModel = model || DEFAULT_MODEL;
 
   fs.mkdirSync(projectDir, { recursive: true });
@@ -359,7 +361,7 @@ ${executableTasks.slice(1).map(t => `  - ${t.id}: ${t.description}`).join("\n") 
       taskInfo = "\n\nNo executable tasks found. All tasks either completed or waiting for dependencies.";
     }
 
-    const client = createClient(projectDir, model, agent, ulw, workspace);
+    const client = createClient(projectDir, model, agent, ulw, workspace, silent, logFile);
     let msg: string;
     
     if (!nextTask && executableTasks.length === 0) {
