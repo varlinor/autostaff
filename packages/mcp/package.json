@@ -1,6 +1,6 @@
 {
   "name": "auto-code-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server for auto-code-bot",
   "type": "module",
   "main": "dist/index.js",

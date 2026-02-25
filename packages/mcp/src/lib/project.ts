@@ -41,6 +41,7 @@ export function detectPhase(dir: string): Phase {
     fs.existsSync(path.join(dir, "app_spec.txt"));
   const hasTasks = fs.existsSync(path.join(dir, TASK_FILE));
 
+  if (!hasSpec && hasTasks) return "execute";
   if (!hasSpec) return "need-spec";
   if (!hasTasks) return "need-tasks";
   return "execute";
@@ -101,7 +102,7 @@ export function getFeaturesByCategory(projectDir: string): Map<string, { passing
 
     for (const task of tasks) {
       const cat = task.category || "unknown";
-      const existing = result.get(cat) || { passing: 0, total: 1 };
+      const existing = result.get(cat) || { passing: 0, total: 0 };
       existing.total++;
       if (task.passes) existing.passing++;
       result.set(cat, existing);
@@ -341,26 +342,19 @@ export function runOneTask(
   const taskDesc = nextTask.description;
   const workspace = nextTask.workspace;
 
-  // Build the command
   const model = options.model || DEFAULT_MODEL;
   const ulwFlag = options.ulw ? "--ulw" : "";
   const maxIterFlag = options.maxIterations ? `--max-iterations ${options.maxIterations}` : "";
-  
-  // For single task execution, we set max-iterations to 1
   const finalMaxIter = "--max-iterations 1";
-
-  // Build workspace path if needed
-  const effectiveDir = workspace 
-    ? path.join(resolvedDir, workspace)
-    : resolvedDir;
-  
   const workspaceArg = workspace ? `--workspace "${workspace}"` : "";
-  const fullCommand = `opencode run --model "${model}" ${ulwFlag} ${finalMaxIter} ${workspaceArg} "Execute task '${taskId}: ${taskDesc}'. Read AGENTS.md and implement this task. After completing, update task.json to mark it as passes:true, then commit with git."`;
+
+  // Always run from project root (resolvedDir) to ensure access to AGENTS.md and task.json
+  // The workspace path is passed via CLI argument
+  const fullCommand = `pnpm exec auto-code-bot "${resolvedDir}" --model "${model}" ${ulwFlag} ${finalMaxIter} ${workspaceArg}`;
 
   try {
-    // Spawn in background (detached not needed, just don't wait)
     const child = spawn(fullCommand, [], {
-      cwd: effectiveDir,
+      cwd: resolvedDir,
       shell: true,
       stdio: ["ignore", "pipe", "pipe"],
       detached: true,
@@ -433,7 +427,8 @@ export function runFullLoop(
   const maxIterFlag = options.maxIterations ? `--max-iterations ${options.maxIterations}` : "";
   const agentFlag = options.agent ? `--agent "${options.agent}"` : "";
   
-  const fullCommand = `opencode run --model "${model}" ${ulwFlag} ${extendFlag} ${maxIterFlag} ${agentFlag}`;
+  const cliCommand = `"auto-code-bot" "${resolvedDir}" --model "${model}" ${ulwFlag} ${extendFlag} ${maxIterFlag} ${agentFlag}`;
+  const fullCommand = `pnpm exec ${cliCommand}`;
 
   try {
     const child = spawn(fullCommand, [], {
@@ -452,7 +447,7 @@ export function runFullLoop(
     });
 
     child.on("error", (err: Error) => {
-      process.stderr.write(`Error spawning opencode: ${err.message}\n`);
+      process.stderr.write(`Error spawning auto-code-bot: ${err.message}\n`);
     });
 
     child.unref();

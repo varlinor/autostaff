@@ -5,12 +5,13 @@
 ## 核心设计：分拆工作流
 
 ```
-Step 1: 用 app-spec-generator skill 生成 app_spec.md
+Step 1: 用 app-spec-generator skill 生成 docs/app_spec.md
 Step 2: 用 auto-code-bot 执行任务直到完成
 ```
 
 **为什么分拆**：
-- `app_spec.md` 是源头，质量决定后续一切
+- `docs/app_spec.md` 是源头，质量决定后续一切
+- 如果已有 `task.json`，可直接执行，跳过 app_spec 阶段
 - 生成 spec 需要迭代打磨，用更强大的 agent
 - auto-code-bot 专注执行，职责单一
 - 符合论文的 initializer + coding agent 分离
@@ -80,7 +81,7 @@ pnpm install -g
 
 ## 快速开始
 
-### Step 1: 生成 app_spec.md
+### Step 1: 生成 app_spec.md（可选）
 
 **方式 A：用 opencode（推荐）**
 ```bash
@@ -90,6 +91,10 @@ opencode
 
 **方式 B：手动编写**
 参考 `prompts/app_spec.md` 模板。
+
+**注意**：
+- `app_spec.md` 可以放在根目录或 `docs/` 目录
+- 如果已有 `task.json`，可以直接跳到 Step 2
 
 ### Step 2: 执行 auto-code-bot
 
@@ -113,7 +118,30 @@ npx auto-code-bot ./my-project --ulw
 | `--model <model>` | `-m` | 指定模型，格式 `provider/model` | `minimax(Custom)/MiniMax-M2.5` |
 | `--agent <name>` | `-a` | 指定 opencode 中的 agent 名称 | 默认 agent |
 | `--max-iterations <n>` | - | 最大迭代轮数 | 无限制 |
+| `--init-only` | - | 仅生成 app_spec.md 和 task.json，不执行任务 | 关闭 |
 | `--extend` | `-e` | 完成后追加新功能模式 | 关闭 |
+
+---
+
+## 工作流
+
+详细工作流说明见 [docs/workflow.md](../docs/workflow.md)。
+
+### 推荐的阶段性工作流
+
+```
+Phase 1: 生成 app_spec.md
+  → 使用 app-spec-generator skill
+
+Phase 2: 生成 task.json
+  → auto-code-bot <dir> --init-only
+
+Phase 3: 审核 task.json（推荐）
+  → 使用 task-auditor skill
+
+Phase 4: 执行任务
+  → auto-code-bot <dir> --ulw
+```
 
 ### 模型示例
 
@@ -143,9 +171,9 @@ npx tsx src/auto-dev.ts ./my-project --ulw -m openai/gpt-4o
 ```
 
 **自动检测**：
-1. 无 `app_spec.md` → 生成规格
+1. 无 `docs/app_spec.md` → 生成规格
 2. 无 `task.json` → 生成任务清单 + 初始化 git
-3. 有 task.json → 执行任务
+3. 有 task.json → 直接执行任务（可跳过 app_spec）
 
 ### 场景 2：继续执行（中断后恢复）
 
@@ -158,7 +186,23 @@ npx tsx src/auto-dev.ts ./my-project --ulw
 - 检测 task.json 中 passes:false 的任务
 - 自动从断点继续执行
 
-### 场景 3：追加新功能
+### 场景 3：仅生成 task.json（审核后执行）
+
+```bash
+# 步骤 1: 仅生成 app_spec.md 和 task.json，不执行
+npx tsx src/auto-dev.ts ./my-project --init-only
+
+# 步骤 2: 审核 task.json（使用 task-auditor skill）
+
+# 步骤 3: 确认无误后执行任务
+npx tsx src/auto-dev.ts ./my-project --ulw
+```
+
+**使用场景**：
+- 需要在执行前审核 task.json 质量
+- 希望分阶段控制开发流程
+
+### 场景 4：追加新功能
 
 ```bash
 # 方式 A：--extend 模式

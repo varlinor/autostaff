@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
 import { getEffectiveDir } from "./workspace.js";
@@ -13,15 +14,43 @@ export interface OpenCodeOptions {
   model?: string;
   agent?: string;
   ulw?: boolean;
+  silent?: boolean;
+  logFile?: string;
 }
 
 export class OpenCodeClient extends EventEmitter {
   private process: ChildProcess | null = null;
   private options: OpenCodeOptions;
+  private outputBuffer = "";
+  private logFilePath = "";
 
   constructor(options: OpenCodeOptions) {
     super();
     this.options = options;
+    if (this.options.silent) {
+      this.logFilePath = this.options.logFile 
+        ? path.resolve(this.options.logFile) 
+        : path.join(this.options.cwd, "auto-code-bot.log");
+    }
+  }
+
+  private writeToLog(text: string): void {
+    if (this.options.silent) {
+      const timestamp = new Date().toISOString();
+      fs.appendFileSync(this.logFilePath, `[${timestamp}] ${text}\n`);
+    }
+  }
+
+  private writeToOutput(text: string, isError = false): void {
+    this.outputBuffer += text;
+    this.writeToLog(text);
+    if (!this.options.silent) {
+      if (isError) {
+        process.stderr.write(text);
+      } else {
+        process.stdout.write(text);
+      }
+    }
   }
 
   async run(message: string): Promise<{ status: "continue" | "error"; output: string }> {
@@ -37,9 +66,20 @@ export class OpenCodeClient extends EventEmitter {
     return new Promise((resolve) => {
       let settled = false;
       let timeoutId: NodeJS.Timeout;
+      this.outputBuffer = "";
 
-      console.log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
-      console.log(chalk.cyan("[auto-code-bot] Starting opencode...\n"));
+      const log = (text: string) => {
+        this.writeToLog(text);
+        console.log(text);
+      };
+
+      const logError = (text: string) => {
+        this.writeToLog(text);
+        console.error(text);
+      };
+
+      log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
+      log(chalk.cyan("[auto-code-bot] Starting opencode...\n"));
 
       this.process = spawn(cmdLine, [], {
         cwd: effectiveDir,
@@ -49,13 +89,13 @@ export class OpenCodeClient extends EventEmitter {
       });
 
       this.process.on("spawn", () => {
-        console.log(chalk.green("[auto-code-bot] opencode started (PID: " + this.process?.pid + ")\n"));
+        log(chalk.green("[auto-code-bot] opencode started (PID: " + this.process?.pid + ")\n"));
       });
 
       timeoutId = setTimeout(() => {
         if (!settled) {
           settled = true;
-          console.log(chalk.yellow(`\n[auto-code-bot] Timeout after ${SESSION_TIMEOUT_MS / 60000}min, killing...`));
+          logError(chalk.yellow(`\n[auto-code-bot] Timeout after ${SESSION_TIMEOUT_MS / 60000}min, killing...`));
           if (this.process) {
             this.process.kill("SIGTERM");
           }
@@ -64,23 +104,50 @@ export class OpenCodeClient extends EventEmitter {
       }, SESSION_TIMEOUT_MS);
 
       this.process.stdout?.on("data", (data) => {
-        process.stdout.write(data.toString());
+        const text = data.toString();
+        this.outputBuffer += text;
+        this.writeToLog(text);
+        if (!this.options.silent) {
+          process.stdout.write(text);
+        }
       });
 
       this.process.stderr?.on("data", (data) => {
         const text = data.toString();
+        this.writeToLog(text);
         if (!text.includes("Debugger") && !text.includes("ExperimentalWarning")) {
-          process.stderr.write(text);
+          if (!this.options.silent) {
+            process.stderr.write(text);
+          }
         }
       });
+
+      const checkSuccess = (exitCode: number | null): "continue" | "error" => {
+        const upperOutput = this.outputBuffer.toUpperCase();
+        
+        if (exitCode === 0) {
+          return "continue";
+        }
+        
+        if (upperOutput.includes("TASK COMPLETE") || 
+            upperOutput.includes("DONE") ||
+            upperOutput.includes("COMPLETE") ||
+            upperOutput.includes("PASS") ||
+            upperOutput.includes("SUCCESS")) {
+          return "continue";
+        }
+        
+        return "error";
+      };
 
       this.process.on("close", (code) => {
         clearTimeout(timeoutId);
         if (!settled) {
           settled = true;
           this.process = null;
-          console.log(chalk.green(`\n[auto-code-bot] Done (exit: ${code})`));
-          resolve({ status: code === 0 ? "continue" : "error", output: "" });
+          const status = checkSuccess(code);
+          log(chalk.green(`\n[auto-code-bot] Done (exit: ${code}) - status: ${status}`));
+          resolve({ status, output: this.outputBuffer });
         }
       });
 
@@ -89,7 +156,7 @@ export class OpenCodeClient extends EventEmitter {
         if (!settled) {
           settled = true;
           this.process = null;
-          console.error(chalk.red(`\n[auto-code-bot] Error: ${err.message}`));
+          logError(chalk.red(`\n[auto-code-bot] Error: ${err.message}`));
           resolve({ status: "error", output: err.message });
         }
       });
@@ -104,12 +171,14 @@ export class OpenCodeClient extends EventEmitter {
   }
 }
 
-export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string): OpenCodeClient {
+export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string, silent?: boolean, logFile?: string): OpenCodeClient {
   return new OpenCodeClient({
     cwd: path.resolve(projectDir),
     workspace,
     model,
     agent,
     ulw,
+    silent,
+    logFile,
   });
 }

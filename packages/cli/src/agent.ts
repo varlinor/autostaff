@@ -3,7 +3,7 @@ import path from "node:path";
 import { createClient, DEFAULT_MODEL } from "./client.js";
 import { countPassingFeatures, printSessionHeader, printProgressSummary, getNextExecutableTask, getExecutableTasks } from "./progress.js";
 import { ensureAgentsMd } from "./prompts.js";
-import { detectProjectType, getWorkspaceFromTask } from "./workspace.js";
+import { detectProjectType, getWorkspaceFromTask, findWorkspaceRoot } from "./workspace.js";
 import chalk from "chalk";
 
 const DELAY_MS = 3000;
@@ -19,6 +19,9 @@ export interface AgentConfig {
   extend?: boolean;
   packageManager?: string;
   gitBranch?: string;
+  initOnly?: boolean;
+  silent?: boolean;
+  logFile?: string;
 }
 
 const SPEC_DIR = "docs";
@@ -27,16 +30,19 @@ const SPEC_FILE = "app_spec.md";
 type Phase = "need-spec" | "need-tasks" | "execute";
 
 function detectPhase(dir: string): Phase {
-  const hasSpec = fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || fs.existsSync(path.join(dir, "app_spec.txt"));
+  const hasSpec = 
+    fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || 
+    fs.existsSync(path.join(dir, "app_spec.txt"));
   const hasTasks = fs.existsSync(path.join(dir, "task.json"));
 
+  if (!hasSpec && hasTasks) return "execute";
   if (!hasSpec) return "need-spec";
   if (!hasTasks) return "need-tasks";
   return "execute";
 }
 
 export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
-  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend } = config;
+  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend, initOnly, silent, logFile } = config;
   const effectiveModel = model || DEFAULT_MODEL;
 
   fs.mkdirSync(projectDir, { recursive: true });
@@ -97,7 +103,7 @@ export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
   // ── Phase 2: Generate task.json + project scaffold ──
   if (phase === "need-tasks") {
     iteration++;
-    if (maxIterations && iteration > maxIterations) {
+    if (maxIterations && iteration >= maxIterations) {
       console.log(chalk.yellow(`\n  Reached max iterations (${maxIterations})`));
       return;
     }
@@ -198,6 +204,14 @@ Read AGENTS.md for the complete workflow rules.`;
     await sleep(DELAY_MS);
   }
 
+  // ── Init-only mode: Stop after generating spec and tasks ──
+  if (initOnly) {
+    console.log(chalk.cyan("\n  ✓ init-only mode: stopping after initialization"));
+    console.log(chalk.dim("  Run again without --init-only to execute tasks\n"));
+    printProgressSummary(projectDir);
+    return;
+  }
+
   // Check if git exists, if not initialize it
   const gitDir = path.join(projectDir, ".git");
   if (!fs.existsSync(gitDir)) {
@@ -226,7 +240,7 @@ Read AGENTS.md for the complete workflow rules.`;
   let allComplete = false;
   while (phase === "execute") {
     iteration++;
-    if (maxIterations && iteration > maxIterations) {
+    if (maxIterations && iteration >= maxIterations) {
       console.log(chalk.yellow(`\n  Reached max iterations (${maxIterations})`));
       break;
     }
@@ -328,7 +342,10 @@ CRITICAL:
     }
 
     let taskInfo = "";
+    let workspace = undefined;
+    const workspaceRoot = findWorkspaceRoot(projectDir);
     if (nextTask) {
+      workspace = getWorkspaceFromTask(nextTask.workspace);
       const deps = nextTask.dependsOn?.length ? ` (depends on: ${nextTask.dependsOn.join(", ")})` : "";
       taskInfo = `\n\nCURRENT TASK (highest priority - all dependencies satisfied):
 ID: ${nextTask.id}
@@ -344,7 +361,7 @@ ${executableTasks.slice(1).map(t => `  - ${t.id}: ${t.description}`).join("\n") 
       taskInfo = "\n\nNo executable tasks found. All tasks either completed or waiting for dependencies.";
     }
 
-    const client = createClient(projectDir, model, agent, ulw);
+    const client = createClient(projectDir, model, agent, ulw, workspace, silent, logFile);
     let msg: string;
     
     if (!nextTask && executableTasks.length === 0) {
@@ -353,19 +370,25 @@ IMPORTANT: Do NOT ask me what to do next. Do NOT suggest new features.
 Simply respond with "DONE" and exit cleanly.
 Do NOT start any new work. Just say "DONE" and nothing else.`;
     } else {
+      const monorepoNote = workspaceRoot && workspaceRoot !== projectDir
+        ? `\n\nMONOREPO DETECTED: You are in a workspace subdirectory.\nWorkspace root: ${workspaceRoot}\nFor build/verification commands, run from workspace root:\n  pnpm -r --filter <package-name> run build\nOr: cd ${workspaceRoot} && pnpm run build`
+        : "";
       msg = `IMPORTANT: First, check which branch you are on: git branch
-If NOT on 'develop' branch, run: git checkout -b develop
+If NOT on 'develop' branch, run: git checkout -b develop${monorepoNote}
 
 Read AGENTS.md for the complete workflow, then follow it exactly.
 Read task.json and pick the next incomplete task (passes:false).
 ${taskInfo}
-Implement it, test it, update task.json (only change passes:false to passes:true).
-CRITICAL: After completing and verifying a task, you MUST:
+
+CRITICAL: Complete EXACTLY ONE task, then exit cleanly.
+Do NOT attempt multiple tasks in one session.
+After completing and verifying a task, you MUST:
   1. git checkout develop (ensure on develop branch)
   2. git add .
   3. git commit -m "[Task #X] description - completed and verified"
   4. Update progress.txt with what was done
-Do NOT skip the commit step - it records progress for future sessions.`;
+  5. Say "TASK COMPLETE" and exit cleanly
+Do NOT continue to the next task - the outer loop will handle that.`;
     }
 
     const result = await client.run(msg);

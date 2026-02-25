@@ -15,6 +15,9 @@ interface FileConfig {
   extend?: boolean;
   packageManager?: string;
   gitBranch?: string;
+  initOnly?: boolean;
+  silent?: boolean;
+  logFile?: string;
 }
 
 const pkg = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
@@ -34,6 +37,9 @@ program
   .option("--spec <file>", "Copy spec file as app_spec.md")
   .option("--desc <text>", "Short description to generate app_spec.md")
   .option("-e, --extend", "Extend mode: add new features when all complete")
+  .option("--init-only", "Only generate app_spec.md and task.json, do not execute tasks")
+  .option("--silent", "Silent mode: log to file only, reduce console output")
+  .option("--log-file <path>", "Log file path (default: auto-code-bot.log in project dir)")
   .option("--package-manager <npm|pnpm|yarn|bun>", "Package manager")
   .option("--git-branch <branch>", "Git branch for development", "develop")
   .action(async (projectDir: string, opts: any) => {
@@ -49,13 +55,16 @@ program
     const config = {
       model: opts.model || fileConfig.model,
       agent: opts.agent || fileConfig.agent,
-      maxIterations: opts.maxIterations || fileConfig.maxIterations,
+      maxIterations: opts.initOnly ? 2 : (opts.maxIterations || fileConfig.maxIterations),
       ulw: opts.ulw ?? fileConfig.ulw,
       specFile: opts.spec || fileConfig.spec,
       description: opts.desc || fileConfig.description,
       extend: opts.extend || fileConfig.extend,
       packageManager: opts.packageManager || fileConfig.packageManager,
       gitBranch: opts.gitBranch || fileConfig.gitBranch || "develop",
+      initOnly: opts.initOnly ?? fileConfig.initOnly,
+      silent: opts.silent ?? fileConfig.silent,
+      logFile: opts.logFile || fileConfig.logFile,
     };
 
     const resolvedDir = path.resolve(projectDir);
@@ -72,6 +81,9 @@ program
         extend: config.extend,
         packageManager: config.packageManager,
         gitBranch: config.gitBranch,
+        initOnly: config.initOnly,
+        silent: config.silent,
+        logFile: config.logFile,
       });
     } catch (error: any) {
       if (error.code === "ERR_USE_AFTER_CLOSE" || error.message?.includes("interrupted")) {

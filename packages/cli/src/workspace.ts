@@ -118,3 +118,26 @@ export function getWorkspaceFromTask(workspace?: string): string | undefined {
   }
   return workspace;
 }
+
+export function findWorkspaceRoot(startDir: string): string | null {
+  let current = path.resolve(startDir);
+  const root = path.parse(current).root;
+
+  while (current !== root) {
+    if (fs.existsSync(path.join(current, "pnpm-workspace.yaml"))) {
+      return current;
+    }
+    if (fs.existsSync(path.join(current, "lerna.json"))) {
+      return current;
+    }
+    if (fs.existsSync(path.join(current, "turbo.json"))) {
+      return current;
+    }
+    if (fs.existsSync(path.join(current, "nx.json"))) {
+      return current;
+    }
+    current = path.dirname(current);
+  }
+
+  return null;
+}

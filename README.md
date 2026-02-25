@@ -11,6 +11,7 @@ Step 2: 用 auto-code-bot 执行任务直到完成
 
 **为什么分拆**：
 - `docs/app_spec.md` 是源头，质量决定后续一切
+- 如果已有 `task.json`，可直接执行，跳过 app_spec 阶段
 - 生成 spec 需要迭代打磨，用更强大的 agent
 - auto-code-bot 专注执行，职责单一
 - 符合论文的 initializer + coding agent 分离
@@ -61,6 +62,7 @@ auto-code-bot/
 │   ├── ROADMAP.md             # 版本路线图
 │   ├── mcp.md                 # MCP 服务器配置指南
 │   └── multi-package-publishing.md  # 发布指南
+├── task.json                   # 任务清单（根目录）
 ├── packages/
 │   ├── cli/                    # CLI 包
 │   │   ├── package.json       # name: auto-code-bot
@@ -147,12 +149,36 @@ npx tsx src/auto-dev.ts "D:\你的项目路径" --ulw --max-iterations 2
 | `--model` | `-m` | 指定模型 | config / minimax(...) |
 | `--agent` | `-a` | 指定 agent 名称 | 默认 |
 | `--max-iterations` | - | 最大迭代轮数 | 无限制 |
+| `--init-only` | - | 仅生成 app_spec.md 和 task.json，不执行 | 关闭 |
 | `--extend` | `-e` | 追加新功能模式 | 关闭 |
 | `--config` | `-c` | 配置文件路径 | auto-code-bot.json |
 | `--spec` | - | 规格文件路径 | - |
 | `--desc` | - | 描述生成规格 | - |
 | `--package-manager` | - | 包管理器 | npm |
 | `--git-branch` | - | Git 分支 | develop |
+| `--silent` | - | 静默模式：opencode 输出写文件 | 关闭 |
+| `--log-file` | - | 日志文件路径 | auto-code-bot.log |
+---
+
+## 工作流指南
+
+详细的工作流说明见 [docs/workflow.md](docs/workflow.md)。
+
+### 推荐的阶段性工作流
+
+```
+Phase 1: 生成 app_spec.md
+  → 使用 app-spec-generator skill
+
+Phase 2: 生成 task.json
+  → auto-code-bot <dir> --init-only
+
+Phase 3: 审核 task.json（推荐）
+  → 使用 task-auditor skill
+
+Phase 4: 执行任务
+  → auto-code-bot <dir> --ulw
+```
 
 ### 使用示例
 
