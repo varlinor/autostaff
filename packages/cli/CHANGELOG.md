@@ -1,5 +1,11 @@
 # auto-code-bot CHANGELOG
 
+## 0.3.1
+
+### Patch Changes
+
+- chore: alter prompts dir position
+
 ## 0.3.0
 
 ### Minor Changes

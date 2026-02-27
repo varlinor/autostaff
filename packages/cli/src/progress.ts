@@ -127,12 +127,111 @@ function createProgressBar(current: number, total: number, width: number): strin
   return `[${filledBar}${emptyBar}]`;
 }
 
+// ========== Progress File Management ==========
+
 export function readProgressNotes(projectDir: string): string | null {
   const progressFile = path.join(projectDir, PROGRESS_FILE);
   if (fs.existsSync(progressFile)) {
     return fs.readFileSync(progressFile, "utf-8");
   }
   return null;
+}
+
+export function initProgressFile(projectDir: string): void {
+  const progressFile = path.join(projectDir, PROGRESS_FILE);
+  if (fs.existsSync(progressFile)) {
+    return; // Already exists
+  }
+
+  const now = new Date().toISOString().split('T')[0];
+  const content = `# auto-code-bot Progress
+
+## ${now}
+
+### Completed Tasks
+- (none yet)
+
+### In Progress
+- (none)
+
+### Pending
+- (all tasks listed in task.json)
+
+### Notes
+- Project initialized
+`;
+
+  fs.writeFileSync(progressFile, content, "utf-8");
+  console.log(chalk.dim(`  Created ${PROGRESS_FILE}`));
+}
+
+export interface ProgressSummary {
+  completed: Task[];
+  inProgress: Task | null;
+  pending: Task[];
+}
+
+export function getProgressSummary(projectDir: string): ProgressSummary {
+  const taskFile = path.join(projectDir, TASK_FILE);
+  const completed: Task[] = [];
+  const pending: Task[] = [];
+  let inProgress: Task | null = null;
+
+  if (!fs.existsSync(taskFile)) {
+    return { completed, inProgress, pending };
+  }
+
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    const tasks = parseTasks(content);
+    const sorted = topologicalSort(tasks);
+
+    for (const task of sorted) {
+      if (task.passes) {
+        completed.push(task);
+      } else if (!inProgress) {
+        // First non-passing task is considered "in progress"
+        inProgress = task;
+        pending.push(task);
+      } else {
+        pending.push(task);
+      }
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
+  return { completed, inProgress, pending };
+}
+
+export function getProgressForPrompt(projectDir: string): string {
+  const summary = getProgressSummary(projectDir);
+  const progress = [];
+
+  if (summary.completed.length > 0) {
+    progress.push("### Completed Tasks");
+    for (const task of summary.completed) {
+      const id = getTaskId(task);
+      progress.push(`- ${id}: ${task.description} ✅`);
+    }
+    progress.push("");
+  }
+
+  if (summary.inProgress) {
+    progress.push("### In Progress");
+    progress.push(`- ${getTaskId(summary.inProgress)}: ${summary.inProgress.description}`);
+    progress.push("");
+  }
+
+  if (summary.pending.length > 0) {
+    progress.push("### Pending");
+    for (const task of summary.pending) {
+      progress.push(`- ${getTaskId(task)}: ${task.description}`);
+    }
+    progress.push("");
+  }
+
+  return progress.length > 0 ? progress.join("\n") : "(no tasks found)";
 }
 
 export function getTaskId(task: Task): string {
@@ -143,7 +242,7 @@ function normalizeDepId(dep: number | string): string {
   return String(dep);
 }
 
-export function topologicalSort(tasks: Task[]): Task[] {
+function topologicalSort(tasks: Task[]): Task[] {
   const taskMap = new Map<string, Task>();
   const inDegree = new Map<string, number>();
   const dependsOnMap = new Map<string, string[]>();

@@ -5,7 +5,7 @@ import chalk from "chalk";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const TEMPLATES_DIR = path.join(__dirname, "..", "..", "..", "prompts");
+const TEMPLATES_DIR = path.join(__dirname, "..", "prompts");
 
 export function ensureAgentsMd(projectDir: string): void {
   const dest = path.join(projectDir, "AGENTS.md");
