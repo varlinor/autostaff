@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createClient, DEFAULT_MODEL } from "./client.js";
-import { countPassingFeatures, printSessionHeader, printProgressSummary, getNextExecutableTask, getExecutableTasks } from "./progress.js";
+import { countPassingFeatures, printSessionHeader, printProgressSummary, getNextExecutableTask, getExecutableTasks, initProgressFile, getProgressForPrompt } from "./progress.js";
 import { ensureAgentsMd } from "./prompts.js";
 import { detectProjectType, getWorkspaceFromTask, findWorkspaceRoot } from "./workspace.js";
 import chalk from "chalk";
@@ -200,6 +200,9 @@ Read AGENTS.md for the complete workflow rules.`;
       return;
     }
 
+    // Initialize progress.txt after task.json is created
+    initProgressFile(projectDir);
+
     printProgressSummary(projectDir);
     await sleep(DELAY_MS);
   }
@@ -235,6 +238,9 @@ Read AGENTS.md for the complete workflow rules.`;
 
     await sleep(DELAY_MS);
   }
+
+  // Initialize progress.txt if it doesn't exist
+  initProgressFile(projectDir);
 
   // ── Phase 3: Execute tasks ──
   let allComplete = false;
@@ -347,19 +353,21 @@ CRITICAL:
     if (nextTask) {
       workspace = getWorkspaceFromTask(nextTask.workspace);
       const deps = nextTask.dependsOn?.length ? ` (depends on: ${nextTask.dependsOn.join(", ")})` : "";
-      taskInfo = `\n\nCURRENT TASK (highest priority - all dependencies satisfied):
+      taskInfo = `
+
+CURRENT TASK (highest priority - all dependencies satisfied):
 ID: ${nextTask.id}
 Type: ${nextTask.type || "app"}
 Workspace: ${nextTask.workspace || "root"}
 Description: ${nextTask.description}${deps}
 Steps:
-${(nextTask.steps || []).map((s, i) => `  ${i + 1}. ${s}`).join("\n")}
-
-Other available tasks (also ready - dependencies satisfied):
-${executableTasks.slice(1).map(t => `  - ${t.id}: ${t.description}`).join("\n") || "  (none)"}`;
+${(nextTask.steps || []).map((s, i) => `  ${i + 1}. ${s}`).join("\n")}`;
     } else {
       taskInfo = "\n\nNo executable tasks found. All tasks either completed or waiting for dependencies.";
     }
+
+    // Get progress info to include in prompt
+    const progressInfo = getProgressForPrompt(projectDir);
 
     const client = createClient(projectDir, model, agent, ulw, workspace, silent, logFile);
     let msg: string;
@@ -380,21 +388,50 @@ Read AGENTS.md for the complete workflow, then follow it exactly.
 Read task.json and pick the next incomplete task (passes:false).
 ${taskInfo}
 
+## Quick Progress Reference (from progress.txt - supplementary):
+${progressInfo}
+
+CRITICAL: Complete EXACTLY ONE task, then exit cleanly.
+Read task.json and pick the next incomplete task (passes:false).
+${taskInfo}
+
+## Quick Progress Reference (supplementary - task.json is the source of truth):
+${progressInfo}
+
+CRITICAL: Complete EXACTLY ONE task, then exit cleanly.
+Do NOT attempt multiple tasks in one session.
+After completing and verifying a task, you MUST:
+  1. git checkout develop (ensure on develop branch)
+  2. Update progress.txt: move the completed task from "In Progress" to "Completed Tasks" section, add a note about what was done
+  3. git add .
+  4. git commit -m "[Task #X] description - completed and verified"
+  5. Say "TASK COMPLETE" and exit cleanly
+Do NOT continue to the next task - the outer loop will handle that.`
+${taskInfo}
+
+## Current Progress (from progress.txt):
+${progressInfo}
+
 CRITICAL: Complete EXACTLY ONE task, then exit cleanly.
 Do NOT attempt multiple tasks in one session.
 After completing and verifying a task, you MUST:
   1. git checkout develop (ensure on develop branch)
   2. git add .
   3. git commit -m "[Task #X] description - completed and verified"
-  4. Update progress.txt with what was done
-  5. Say "TASK COMPLETE" and exit cleanly
+  4. Say "TASK COMPLETE" and exit cleanly
 Do NOT continue to the next task - the outer loop will handle that.`;
     }
+
+    // Track passing count before task execution
+    const passingBefore = countPassingFeatures(projectDir).passing;
+    const currentTaskId = nextTask?.id;
+    const currentTaskDesc = nextTask?.description || "";
 
     const result = await client.run(msg);
 
     const { passing: currentPassing, total: currentTotal } = countPassingFeatures(projectDir);
     const allNowComplete = currentTotal > 0 && currentPassing === currentTotal;
+    const taskCompleted = currentPassing > passingBefore;
 
     if (result.status === "continue" && !allNowComplete) {
       printProgressSummary(projectDir);
