@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": "/packages/cli/src",
+      "@varlinor/auto-bot-core": "/packages/core/src/index.ts",
     },
   },
 });

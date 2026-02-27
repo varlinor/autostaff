@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { topologicalSort, getExecutableTasks, getNextExecutableTask, type Task } from "../../packages/cli/src/progress.js";
+import { topologicalSort, getExecutableTasks, getNextExecutableTask, type Task } from "@varlinor/auto-bot-core";
 
 describe("progress.ts", () => {
   const testDir = path.join(process.cwd(), "test", "temp-progress");

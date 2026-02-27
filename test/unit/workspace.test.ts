@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { detectProjectType, getEffectiveDir, getWorkspaceFromTask, type ProjectType } from "../../packages/cli/src/workspace.js";
+import { detectProjectType, getEffectiveDir, getWorkspaceFromTask, findWorkspaceRoot, type ProjectType } from "@varlinor/auto-bot-core";
 
 describe("workspace.ts", () => {
   const testDir = path.join(process.cwd(), "test", "temp-workspace");
