@@ -1,0 +1,230 @@
+/**
+ * Task management - extracted from cli progress.ts
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import type { Task } from "./types.js";
+
+export { Task } from "./types.js";
+
+const TASK_FILE = "task.json";
+const PROGRESS_FILE = "progress.txt";
+
+/**
+ * Strip JSONC comments from content
+ */
+export function stripJsoncComments(text: string): string {
+  return text.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+/**
+ * Parse tasks from task.json content
+ */
+export function parseTasks(content: string): Task[] {
+  const stripped = stripJsoncComments(content);
+  const parsed = JSON.parse(stripped);
+  // Support both formats: [...] and { "tasks": [...] }
+  if (Array.isArray(parsed)) {
+    return parsed;
+  }
+  if (parsed.tasks && Array.isArray(parsed.tasks)) {
+    return parsed.tasks;
+  }
+  throw new Error("Invalid task.json format");
+}
+
+/**
+ * Count passing features in project
+ */
+export function countPassingFeatures(projectDir: string): { passing: number; total: number } {
+  const taskFile = path.join(projectDir, TASK_FILE);
+
+  if (!fs.existsSync(taskFile)) {
+    return { passing: 0, total: 0 };
+  }
+
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    const tasks = parseTasks(content);
+    const total = tasks.length;
+    const passing = tasks.filter((t) => t.passes).length;
+    return { passing, total };
+  } catch (e) {
+    console.warn(`Warning: Failed to parse task.json: ${e}`);
+    return { passing: 0, total: 0 };
+  }
+}
+
+/**
+ * Get features grouped by category
+ */
+export function getFeaturesByCategory(projectDir: string): Map<string, { passing: number; total: number }> {
+  const taskFile = path.join(projectDir, TASK_FILE);
+  const result = new Map<string, { passing: number; total: number }>();
+
+  if (!fs.existsSync(taskFile)) {
+    return result;
+  }
+
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    const tasks = parseTasks(content);
+
+    for (const task of tasks) {
+      const cat = task.category || "unknown";
+      const existing = result.get(cat) || { passing: 0, total: 0 };
+      existing.total++;
+      if (task.passes) existing.passing++;
+      result.set(cat, existing);
+    }
+  } catch (e) {
+    /* ignore parse errors */
+  }
+
+  return result;
+}
+
+/**
+ * Check if first run (no task.json)
+ */
+export function isFirstRun(projectDir: string): boolean {
+  return !fs.existsSync(path.join(projectDir, TASK_FILE));
+}
+
+/**
+ * Get task ID as string
+ */
+export function getTaskId(task: Task): string {
+  return String(task.id ?? "");
+}
+
+function normalizeDepId(dep: number | string): string {
+  return String(dep);
+}
+
+/**
+ * Topological sort of tasks based on dependencies
+ */
+export function topologicalSort(tasks: Task[]): Task[] {
+  const taskMap = new Map<string, Task>();
+  const inDegree = new Map<string, number>();
+  const dependsOnMap = new Map<string, string[]>();
+
+  for (const task of tasks) {
+    const id = getTaskId(task);
+    taskMap.set(id, task);
+    inDegree.set(id, 0);
+    dependsOnMap.set(id, (task.dependsOn || []).map(normalizeDepId));
+  }
+
+  for (const [id, deps] of dependsOnMap) {
+    for (const depId of deps) {
+      const currentDegree = inDegree.get(id) ?? 0;
+      inDegree.set(id, currentDegree + 1);
+    }
+  }
+
+  const queue: string[] = [];
+  for (const [id, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(id);
+    }
+  }
+
+  const sorted: Task[] = [];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    const task = taskMap.get(id);
+    if (task) {
+      sorted.push(task);
+    }
+
+    for (const [otherId, deps] of dependsOnMap) {
+      if (deps.includes(id)) {
+        const newDegree = (inDegree.get(otherId) ?? 1) - 1;
+        inDegree.set(otherId, newDegree);
+        if (newDegree === 0) {
+          queue.push(otherId);
+        }
+      }
+    }
+  }
+
+  if (sorted.length !== tasks.length) {
+    console.warn("Warning: Circular dependency detected in task.json");
+    return tasks;
+  }
+
+  return sorted;
+}
+
+/**
+ * Get executable tasks (tasks where all dependencies are satisfied)
+ */
+export function getExecutableTasks(projectDir: string): Task[] {
+  const taskFile = path.join(projectDir, TASK_FILE);
+
+  if (!fs.existsSync(taskFile)) {
+    return [];
+  }
+
+  try {
+    const content = fs.readFileSync(taskFile, "utf-8");
+    const tasks = parseTasks(content);
+    const sorted = topologicalSort(tasks);
+
+    const completedIds = new Set<string>();
+    for (const task of sorted) {
+      if (task.passes) {
+        completedIds.add(getTaskId(task));
+      }
+    }
+
+    const executable: Task[] = [];
+    for (const task of sorted) {
+      if (task.passes) {
+        continue;
+      }
+
+      const deps = (task.dependsOn || []).map(normalizeDepId);
+      const allDepsCompleted = deps.every((depId) => completedIds.has(depId));
+
+      if (allDepsCompleted) {
+        executable.push(task);
+      }
+    }
+
+    return executable;
+  } catch (e) {
+    console.warn(`Warning: Failed to get executable tasks: ${e}`);
+    return [];
+  }
+}
+
+/**
+ * Get next executable task (highest priority)
+ */
+export function getNextExecutableTask(projectDir: string): Task | null {
+  const executable = getExecutableTasks(projectDir);
+  return executable.length > 0 ? executable[0] : null;
+}
+
+/**
+ * Read progress notes
+ */
+export function readProgressNotes(projectDir: string): string | null {
+  const progressFile = path.join(projectDir, PROGRESS_FILE);
+  if (fs.existsSync(progressFile)) {
+    return fs.readFileSync(progressFile, "utf-8");
+  }
+  return null;
+}
+
+/**
+ * Write progress notes
+ */
+export function writeProgressNotes(projectDir: string, content: string): void {
+  const progressFile = path.join(projectDir, PROGRESS_FILE);
+  fs.writeFileSync(progressFile, content, "utf-8");
+}

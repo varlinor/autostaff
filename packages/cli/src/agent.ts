@@ -1,9 +1,20 @@
-import fs from "node:fs";
 import path from "node:path";
 import { createClient, DEFAULT_MODEL } from "./client.js";
-import { countPassingFeatures, printSessionHeader, printProgressSummary, getNextExecutableTask, getExecutableTasks } from "./progress.js";
+import {
+  countPassingFeatures,
+  getNextExecutableTask,
+  getExecutableTasks
+} from "@varlinor/auto-bot-core";
+import {
+  printSessionHeader,
+  printProgressSummary
+} from "./progress-ui.js";
 import { ensureAgentsMd } from "./prompts.js";
-import { detectProjectType, getWorkspaceFromTask, findWorkspaceRoot } from "./workspace.js";
+import {
+  detectProjectType,
+  getWorkspaceFromTask,
+  findWorkspaceRoot
+} from "@varlinor/auto-bot-core";
 import chalk from "chalk";
 
 const DELAY_MS = 3000;
@@ -20,7 +31,7 @@ export interface AgentConfig {
   packageManager?: string;
   gitBranch?: string;
   initOnly?: boolean;
-  silent?: boolean;
+  verbose?: boolean;
   logFile?: string;
 }
 
@@ -41,8 +52,10 @@ function detectPhase(dir: string): Phase {
   return "execute";
 }
 
+import fs from "node:fs";
+
 export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
-  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend, initOnly, silent, logFile } = config;
+  const { projectDir, model, agent, maxIterations, ulw, specFile, description, extend, initOnly, verbose, logFile } = config;
   const effectiveModel = model || DEFAULT_MODEL;
 
   fs.mkdirSync(projectDir, { recursive: true });
@@ -70,7 +83,7 @@ export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
   let phase = detectPhase(projectDir);
   let iteration = 0;
 
-  // ── Phase 1: Generate app_spec.md ──
+  // Phase 1: Generate app_spec.md
   if (phase === "need-spec") {
     iteration++;
     printSessionHeader(iteration, true);
@@ -100,7 +113,7 @@ export async function runAutonomousAgent(config: AgentConfig): Promise<void> {
     await sleep(DELAY_MS);
   }
 
-  // ── Phase 2: Generate task.json + project scaffold ──
+  // Phase 2: Generate task.json + project scaffold
   if (phase === "need-tasks") {
     iteration++;
     if (maxIterations && iteration >= maxIterations) {
@@ -204,7 +217,7 @@ Read AGENTS.md for the complete workflow rules.`;
     await sleep(DELAY_MS);
   }
 
-  // ── Init-only mode: Stop after generating spec and tasks ──
+  // Init-only mode: Stop after generating spec and tasks
   if (initOnly) {
     console.log(chalk.cyan("\n  ✓ init-only mode: stopping after initialization"));
     console.log(chalk.dim("  Run again without --init-only to execute tasks\n"));
@@ -236,7 +249,7 @@ Read AGENTS.md for the complete workflow rules.`;
     await sleep(DELAY_MS);
   }
 
-  // ── Phase 3: Execute tasks ──
+  // Phase 3: Execute tasks
   let allComplete = false;
   while (phase === "execute") {
     iteration++;
@@ -347,7 +360,9 @@ CRITICAL:
     if (nextTask) {
       workspace = getWorkspaceFromTask(nextTask.workspace);
       const deps = nextTask.dependsOn?.length ? ` (depends on: ${nextTask.dependsOn.join(", ")})` : "";
-      taskInfo = `\n\nCURRENT TASK (highest priority - all dependencies satisfied):
+      taskInfo = `
+
+CURRENT TASK (highest priority - all dependencies satisfied):
 ID: ${nextTask.id}
 Type: ${nextTask.type || "app"}
 Workspace: ${nextTask.workspace || "root"}
@@ -361,7 +376,7 @@ ${executableTasks.slice(1).map(t => `  - ${t.id}: ${t.description}`).join("\n") 
       taskInfo = "\n\nNo executable tasks found. All tasks either completed or waiting for dependencies.";
     }
 
-    const client = createClient(projectDir, model, agent, ulw, workspace, silent, logFile);
+    const client = createClient(projectDir, model, agent, ulw, workspace, verbose, logFile);
     let msg: string;
     
     if (!nextTask && executableTasks.length === 0) {

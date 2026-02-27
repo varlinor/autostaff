@@ -1,22 +1,39 @@
 /**
  * Shared utilities for MCP server
- * Reused logic from CLI for phase detection and task parsing
+ * Uses core package for shared functionality
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 
-export interface Task {
-  id?: number | string;
-  category: string;
-  description: string;
-  steps: string[];
-  passes: boolean;
-  type?: "package" | "app";
-  workspace?: string;
-  dependsOn?: (number | string)[];
-}
+// Import from core package - eliminates code duplication
+import {
+  detectPhase,
+  parseTasks,
+  countPassingFeatures,
+  getFeaturesByCategory,
+  readProgressNotes,
+  getExecutableTasks,
+  getNextExecutableTask,
+  getTaskId,
+  topologicalSort,
+  type Task,
+  type Phase,
+} from "@varlinor/auto-bot-core";
+
+// Re-export types from core for backward compatibility
+export type { Task, Phase };
+
+// Re-export core functions for MCP server
+export {
+  detectPhase,
+  countPassingFeatures,
+  getFeaturesByCategory,
+  readProgressNotes,
+  getExecutableTasks,
+  getNextExecutableTask,
+};
 
 export interface RunOneTaskOptions {
   model?: string;
@@ -29,101 +46,6 @@ const TASK_FILE = "task.json";
 const PROGRESS_FILE = "progress.txt";
 const SPEC_DIR = "docs";
 const SPEC_FILE = "app_spec.md";
-
-export type Phase = "need-spec" | "need-tasks" | "execute";
-
-/**
- * Detect the current phase of the project
- */
-export function detectPhase(dir: string): Phase {
-  const hasSpec = 
-    fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || 
-    fs.existsSync(path.join(dir, "app_spec.txt"));
-  const hasTasks = fs.existsSync(path.join(dir, TASK_FILE));
-
-  if (!hasSpec && hasTasks) return "execute";
-  if (!hasSpec) return "need-spec";
-  if (!hasTasks) return "need-tasks";
-  return "execute";
-}
-
-function stripJsoncComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
-}
-
-function parseTasks(content: string): Task[] {
-  const stripped = stripJsoncComments(content);
-  const parsed = JSON.parse(stripped);
-  // Support both formats: [...] and { "tasks": [...] }
-  if (Array.isArray(parsed)) {
-    return parsed;
-  }
-  if (parsed.tasks && Array.isArray(parsed.tasks)) {
-    return parsed.tasks;
-  }
-  throw new Error("Invalid task.json format");
-}
-
-/**
- * Count passing and total tasks
- */
-export function countPassingFeatures(projectDir: string): { passing: number; total: number } {
-  const taskFile = path.join(projectDir, TASK_FILE);
-
-  if (!fs.existsSync(taskFile)) {
-    return { passing: 0, total: 0 };
-  }
-
-  try {
-    const content = fs.readFileSync(taskFile, "utf-8");
-    const tasks = parseTasks(content);
-    const total = tasks.length;
-    const passing = tasks.filter((t) => t.passes).length;
-    return { passing, total };
-  } catch (e) {
-    return { passing: 0, total: 0 };
-  }
-}
-
-/**
- * Get task counts by category
- */
-export function getFeaturesByCategory(projectDir: string): Map<string, { passing: number; total: number }> {
-  const taskFile = path.join(projectDir, TASK_FILE);
-  const result = new Map<string, { passing: number; total: number }>();
-
-  if (!fs.existsSync(taskFile)) {
-    return result;
-  }
-
-  try {
-    const content = fs.readFileSync(taskFile, "utf-8");
-    const tasks = parseTasks(content);
-
-    for (const task of tasks) {
-      const cat = task.category || "unknown";
-      const existing = result.get(cat) || { passing: 0, total: 0 };
-      existing.total++;
-      if (task.passes) existing.passing++;
-      result.set(cat, existing);
-    }
-  } catch (e) {
-    /* ignore parse errors */
-  }
-
-  return result;
-}
-
-/**
- * Read progress notes
- */
-export function readProgressNotes(projectDir: string): string | null {
-  const progressFile = path.join(projectDir, PROGRESS_FILE);
-  if (fs.existsSync(progressFile)) {
-    return fs.readFileSync(progressFile, "utf-8");
-  }
-  return null;
-}
 
 /**
  * Read task.json content
@@ -189,119 +111,6 @@ export function getProjectStatus(projectDir: string): ProjectStatus {
     categories,
     progressSummary
   };
-}
-
-function normalizeDepId(dep: number | string): string {
-  return String(dep);
-}
-
-function getTaskId(task: Task): string {
-  return String(task.id ?? "");
-}
-
-function topologicalSort(tasks: Task[]): Task[] {
-  const taskMap = new Map<string, Task>();
-  const inDegree = new Map<string, number>();
-  const dependsOnMap = new Map<string, string[]>();
-
-  for (const task of tasks) {
-    const id = getTaskId(task);
-    taskMap.set(id, task);
-    inDegree.set(id, 0);
-    dependsOnMap.set(id, (task.dependsOn || []).map(normalizeDepId));
-  }
-
-  for (const [id, deps] of dependsOnMap) {
-    for (const depId of deps) {
-      const currentDegree = inDegree.get(id) ?? 0;
-      inDegree.set(id, currentDegree + 1);
-    }
-  }
-
-  const queue: string[] = [];
-  for (const [id, degree] of inDegree) {
-    if (degree === 0) {
-      queue.push(id);
-    }
-  }
-
-  const sorted: Task[] = [];
-  while (queue.length > 0) {
-    const id = queue.shift()!;
-    const task = taskMap.get(id);
-    if (task) {
-      sorted.push(task);
-    }
-
-    for (const [otherId, deps] of dependsOnMap) {
-      if (deps.includes(id)) {
-        const newDegree = (inDegree.get(otherId) ?? 1) - 1;
-        inDegree.set(otherId, newDegree);
-        if (newDegree === 0) {
-          queue.push(otherId);
-        }
-      }
-    }
-  }
-
-  if (sorted.length !== tasks.length) {
-    console.error("Warning: Circular dependency detected in task.json");
-    return tasks;
-  }
-
-  return sorted;
-}
-
-function parseTasksFromFile(projectDir: string): Task[] {
-  const taskFile = path.join(projectDir, TASK_FILE);
-  if (!fs.existsSync(taskFile)) {
-    return [];
-  }
-  try {
-    const content = fs.readFileSync(taskFile, "utf-8");
-    return parseTasks(content);
-  } catch (e) {
-    console.error(`Warning: Failed to parse task.json: ${e}`);
-    return [];
-  }
-}
-
-export function getExecutableTasks(projectDir: string): Task[] {
-  const tasks = parseTasksFromFile(projectDir);
-  
-  if (tasks.length === 0) {
-    return [];
-  }
-  
-  const sorted = topologicalSort(tasks);
-
-  const completedIds = new Set<string>();
-  for (const task of sorted) {
-    if (task.passes) {
-      completedIds.add(getTaskId(task));
-    }
-  }
-
-  const executable: Task[] = [];
-  for (const task of sorted) {
-    if (task.passes) {
-      continue;
-    }
-
-    const deps = (task.dependsOn || []).map(normalizeDepId);
-    const allDepsCompleted = deps.every((depId) => completedIds.has(depId));
-
-    if (allDepsCompleted) {
-      executable.push(task);
-    }
-  }
-
-  return executable;
-}
-
-export function getNextExecutableTask(projectDir: string): Task | null {
-  const executable = getExecutableTasks(projectDir);
-  return executable.length > 0 ? executable[0] : null;
 }
 
 const DEFAULT_MODEL = "minimax(Custom)/MiniMax-M2.5";

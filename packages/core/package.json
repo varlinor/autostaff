@@ -1,0 +1,41 @@
+{
+  "name": "@varlinor/auto-bot-core",
+  "version": "0.1.0",
+  "description": "Core framework for autonomous automation bots",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "chalk": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/varlinor/code-bot"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "autonomous",
+    "automation",
+    "opencode"
+  ],
+  "author": "varlinor",
+  "license": "MIT"
+}
