@@ -49,6 +49,34 @@ Step 2: 用 auto-code-bot 执行任务直到完成
 
 ---
 
+## 包架构
+
+### 依赖关系
+
+```
+packages/
+├── core/           (@varlinor/auto-bot-core)     ← 核心基础设施
+├── code/           (auto-code)                   → 依赖 core
+├── text/           (auto-text)                   → 依赖 core  
+├── cli/            (auto-bot)                    → 依赖 core + code + text
+└── mcp/            (auto-code-mcp)              → 依赖 core
+```
+
+### 包职责
+
+| 包 | 职责 |
+|---|---|
+| **core** | task.json 解析、阶段检测、progress.txt 管理、git 提交、workspace 检测 |
+| **code** | 代码开发 agent，提供 runCodeAgent() |
+| **text** | 文本内容 agent，提供 runTextBot() |
+| **cli** | 主入口，根据参数加载 code/text agent |
+| **mcp** | MCP 协议服务器，供 Claude Desktop/Cursor 集成 |
+
+---
+
+## 目录结构
+---
+
 ## 目录结构
 
 ```
@@ -64,16 +92,23 @@ auto-code-bot/
 │   └── multi-package-publishing.md  # 发布指南
 ├── task.json                   # 任务清单（根目录）
 ├── packages/
-│   ├── cli/                    # CLI 包
-│   │   ├── package.json       # name: auto-code-bot
-│   │   ├── src/
-│   │   └── dist/
-│   └── mcp/                    # MCP 服务包
-│       ├── package.json        # name: auto-code-mcp
+│   ├── core/                   # 核心包 - 任务管理、阶段检测、git提交
+│   │   ├── package.json       # name: @varlinor/auto-bot-core
+│   │   └── src/
+│   ├── code/                   # 代码开发 Agent
+│   │   ├── package.json       # name: auto-code
+│   │   └── src/
+│   ├── text/                   # 文本内容 Agent
+│   │   ├── package.json       # name: auto-text
+│   │   └── src/
+│   ├── cli/                    # CLI 主入口
+│   │   ├── package.json       # name: auto-bot
+│   │   └── src/
+│   └── mcp/                    # MCP 服务器
+│       ├── package.json       # name: auto-code-mcp
 │       └── src/
-└── prompts/                    # Agent 提示词
-    ├── AGENTS.md
-    └── app_spec.md
+├── skills/                     # Agent skills
+└── test/                      # 测试用例
 ```
 
 ---
@@ -154,7 +189,9 @@ npx tsx src/auto-dev.ts "D:\你的项目路径" --ulw --max-iterations 2
 | `--config` | `-c` | 配置文件路径 | auto-code-bot.json |
 | `--spec` | - | 规格文件路径 | - |
 | `--desc` | - | 描述生成规格 | - |
-| `--package-manager` | - | 包管理器 | npm |
+| `--git-branch` | - | Git 分支 | develop |
+| `--verbose` | - | 详细模式：输出到控制台（默认：输出到日志文件） | 关闭 |
+| `--log-file` | - | 日志文件路径 | auto-code-bot-detail.log |
 | `--git-branch` | - | Git 分支 | develop |
 | `--silent` | - | 静默模式：opencode 输出写文件 | 关闭 |
 | `--log-file` | - | 日志文件路径 | auto-code-bot.log |

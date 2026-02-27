@@ -2,6 +2,17 @@
 
 本项目提供 MCP (Model Context Protocol) 服务器，可在 Cursor、Claude Desktop 等 MCP 客户端中使用。
 
+## 架构
+
+MCP 服务器依赖 `@varlinor/auto-bot-core` 核心包，提供以下功能：
+
+- 阶段检测 (need-spec / need-tasks / execute)
+- 任务解析和拓扑排序
+- 进度统计
+- 通过 CLI 执行任务
+
+## 快速开始
+
 ## 快速开始
 
 ### 1. 构建 MCP 服务
