@@ -80,6 +80,7 @@
 ## 2026-02-28 (continued)
 
 ### Completed Tasks
+JK|- task-import-fix-1: Fix imports - remove .js extensions, use TypeScript spec ✅
 - task-cli-commands-1: Update CLI subcommand documentation for code and text commands ✅
 
 ### In Progress
