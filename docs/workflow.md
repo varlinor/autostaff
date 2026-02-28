@@ -1,6 +1,6 @@
 # Workflow Guide
 
-本指南描述 auto-code-bot 的完整工作流程，包括如何分阶段执行以确保高质量的任务生成和执行。
+本指南描述 auto-staff 的完整工作流程，包括如何分阶段执行以确保高质量的任务生成和执行。
 
 ## 推荐的阶段性工作流
 
@@ -167,7 +167,7 @@ npx tsx src/auto-dev.ts <project-dir> --ulw --verbose --log-file ./logs/bot.log
 **说明**：
 - 默认模式（无 --verbose）：opencode 输出写入日志文件
 - 详细模式（--verbose）：opencode 输出打印到控制台
-- 日志文件默认为项目目录下的 `auto-code-bot-detail.log`
+- 日志文件默认为项目目录下的 `auto-staff-detail.log`
 - 日志带时间戳，便于问题排查
 - logFile 支持绝对路径或相对于 project-dir 的路径
 
@@ -185,7 +185,7 @@ npx tsx src/auto-dev.ts <project-dir> --ulw --silent --log-file ./logs/bot.log
 **说明**：
 - auto-bot 自身输出始终显示在控制台（实时进度）
 - opencode 子进程输出可选转文件（减少干扰）
-- 日志文件默认为项目目录下的 `auto-code-bot.log`
+- 日志文件默认为项目目录下的 `auto-staff.log`
 - 日志带时间戳，便于问题排查
 
 ---

@@ -1,4 +1,4 @@
-# auto-code-bot Roadmap
+# auto-staff Roadmap
 
 ## 版本历程
 
@@ -156,7 +156,7 @@
 
 **规划中**：
 - [ ] 创建 `~/.config/auto-bot/config.json` 全局配置
-- [ ] 支持项目级配置 `auto-code-bot.json`（优先级：CLI > 项目 > 全局）
+- [ ] 支持项目级配置 `auto-staff.json`（优先级：CLI > 项目 > 全局）
 - [ ] 提取默认模型配置
 - [ ] 提取默认分支配置
 - [ ] 提取日志配置
@@ -180,14 +180,14 @@
 #### 配置项设计
 
 ```json
-// 项目级配置 auto-code-bot.json 或全局配置 ~/.config/auto-bot/config.json
+// 项目级配置 auto-staff.json 或全局配置 ~/.config/auto-bot/config.json
 {
   "executor": {
     "type": "opencode",
     "command": "pnpm exec opencode",
     "args": [],
     "silent": false,
-    "logFile": "auto-code-bot.log"
+    "logFile": "auto-staff.log"
   },
   "model": "minimax(Custom)/MiniMax-M2.5",
   "packageManager": "npm",
@@ -200,7 +200,7 @@
 
 **配置优先级**（从高到低）：
 1. CLI 参数（最高优先级）
-2. 项目级配置 `auto-code-bot.json`
+2. 项目级配置 `auto-staff.json`
 3. 全局配置 `~/.config/auto-bot/config.json`
 4. 代码默认值（最低优先级）
 
@@ -226,7 +226,7 @@
 ## 当前项目结构
 
 ```
-auto-code-bot/
+auto-staff/
 ├── pnpm-workspace.yaml              ✅
 ├── package.json                      ✅
 ├── docs/                            ✅

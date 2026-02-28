@@ -1,4 +1,4 @@
-# auto-code-bot
+# auto-staff
 
 基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念构建的全自动编程系统。通过 **opencode** 子进程驱动，跨多个上下文窗口持续增量开发，直到项目完成。
 
@@ -6,14 +6,14 @@
 
 ```
 Step 1: 用 app-spec-generator skill 生成 docs/app_spec.md
-Step 2: 用 auto-code-bot 执行任务直到完成
+Step 2: 用 auto-staff 执行任务直到完成
 ```
 
 **为什么分拆**：
 - `docs/app_spec.md` 是源头，质量决定后续一切
 - 如果已有 `task.json`，可直接执行，跳过 app_spec 阶段
 - 生成 spec 需要迭代打磨，用更强大的 agent
-- auto-code-bot 专注执行，职责单一
+- auto-staff 专注执行，职责单一
 - 符合论文的 initializer + coding agent 分离
 
 ---
@@ -96,7 +96,7 @@ opencode
 - `app_spec.md` 可以放在根目录或 `docs/` 目录
 - 如果已有 `task.json`，可以直接跳到 Step 2
 
-### Step 2: 执行 auto-code-bot
+### Step 2: 执行 auto-staff
 
 ```bash
 # 开发模式（推荐）
@@ -104,7 +104,7 @@ npx tsx src/auto-dev.ts ./my-project --ulw
 
 # 或构建后运行
 npm run build
-npx auto-code-bot ./my-project --ulw
+npx auto-staff ./my-project --ulw
 ```
 
 ---
@@ -134,13 +134,13 @@ Phase 1: 生成 app_spec.md
   → 使用 app-spec-generator skill
 
 Phase 2: 生成 task.json
-  → auto-code-bot <dir> --init-only
+  → auto-staff <dir> --init-only
 
 Phase 3: 审核 task.json（推荐）
   → 使用 task-auditor skill
 
 Phase 4: 执行任务
-  → auto-code-bot <dir> --ulw
+  → auto-staff <dir> --ulw
 ```
 
 ### 模型示例

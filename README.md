@@ -1,4 +1,4 @@
-# auto-code-bot Toolkit
+# auto-staff Toolkit
 
 基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念构建的全自动编程系统。通过 **opencode** 子进程驱动，跨多个上下文窗口持续增量开发，直到项目完成。
 
@@ -6,14 +6,14 @@
 
 ```
 Step 1: 用 app-spec-generator skill 生成 docs/app_spec.md
-Step 2: 用 auto-code-bot 执行任务直到完成
+Step 2: 用 auto-staff 执行任务直到完成
 ```
 
 **为什么分拆**：
 - `docs/app_spec.md` 是源头，质量决定后续一切
 - 如果已有 `task.json`，可直接执行，跳过 app_spec 阶段
 - 生成 spec 需要迭代打磨，用更强大的 agent
-- auto-code-bot 专注执行，职责单一
+- auto-staff 专注执行，职责单一
 - 符合论文的 initializer + coding agent 分离
 
 ---
@@ -89,7 +89,7 @@ packages/
 ## 目录结构
 
 ```
-auto-code-bot/
+auto-staff/
 ├── pnpm-workspace.yaml          # pnpm 工作区配置
 ├── package.json                  # 根目录 (workspace)
 ├── tsconfig.json                # TypeScript 项目引用
@@ -164,7 +164,7 @@ pnpm dev:mcp
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
       "args": ["packages/mcp/dist/index.js"]
     }
@@ -197,15 +197,15 @@ npx tsx src/auto-dev.ts "D:\你的项目路径" --ulw --max-iterations 2
 | `--max-iterations` | - | 最大迭代轮数 | 无限制 |
 | `--init-only` | - | 仅生成 app_spec.md 和 task.json，不执行 | 关闭 |
 | `--extend` | `-e` | 追加新功能模式 | 关闭 |
-| `--config` | `-c` | 配置文件路径 | auto-code-bot.json |
+| `--config` | `-c` | 配置文件路径 | auto-staff.json |
 | `--spec` | - | 规格文件路径 | - |
 | `--desc` | - | 描述生成规格 | - |
 | `--git-branch` | - | Git 分支 | develop |
 | `--verbose` | - | 详细模式：输出到控制台（默认：输出到日志文件） | 关闭 |
-| `--log-file` | - | 日志文件路径 | auto-code-bot-detail.log |
+| `--log-file` | - | 日志文件路径 | auto-staff-detail.log |
 | `--git-branch` | - | Git 分支 | develop |
 | `--silent` | - | 静默模式：opencode 输出写文件 | 关闭 |
-| `--log-file` | - | 日志文件路径 | auto-code-bot.log |
+| `--log-file` | - | 日志文件路径 | auto-staff.log |
 ---
 
 ## 工作流指南
@@ -219,13 +219,13 @@ Phase 1: 生成 app_spec.md
   → 使用 app-spec-generator skill
 
 Phase 2: 生成 task.json
-  → auto-code-bot <dir> --init-only
+  → auto-staff <dir> --init-only
 
 Phase 3: 审核 task.json（推荐）
   → 使用 task-auditor skill
 
 Phase 4: 执行任务
-  → auto-code-bot <dir> --ulw
+  → auto-staff <dir> --ulw
 ```
 
 ### 使用示例
@@ -300,7 +300,7 @@ Step 8: 更新 task.json + progress.txt
 
 ### 配置文件
 
-在项目目录创建 `auto-code-bot.json`：
+在项目目录创建 `auto-staff.json`：
 
 ```json
 {

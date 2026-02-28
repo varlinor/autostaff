@@ -1,6 +1,6 @@
 # auto-code-mcp
 
-MCP (Model Context Protocol) 服务器，用于将 auto-code-bot 集成到支持 MCP 的 IDE 中，如 Claude Desktop、Cursor 等。
+MCP (Model Context Protocol) 服务器，用于将 auto-staff 集成到支持 MCP 的 IDE 中，如 Claude Desktop、Cursor 等。
 
 ## 核心特性
 
@@ -52,7 +52,7 @@ pnpm build:mcp
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
       "args": ["packages/mcp/dist/index.js"]
     }
@@ -68,13 +68,13 @@ pnpm build:mcp
 
 ## 工作流
 
-MCP 服务是 auto-code-bot 工作流的一部分。详细工作流说明见 [docs/workflow.md](../docs/workflow.md)。
+MCP 服务是 auto-staff 工作流的一部分。详细工作流说明见 [docs/workflow.md](../docs/workflow.md)。
 
 推荐的阶段性工作流：
 1. 使用 app-spec-generator skill 生成 app_spec.md
-2. 使用 `auto-code-bot --init-only` 生成 task.json
+2. 使用 `auto-staff --init-only` 生成 task.json
 3. 使用 task-auditor skill 审核 task.json
-4. 使用 `auto-code-bot --ulw` 执行任务
+4. 使用 `auto-staff --ulw` 执行任务
 
 ---
 

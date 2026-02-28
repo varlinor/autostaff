@@ -1,12 +1,12 @@
-# auto-code-bot Toolkit：Mono-repo 与 MCP 服务开发规格
+# auto-staff Toolkit：Mono-repo 与 MCP 服务开发规格
 
-> 本规格描述当前工程需要开发的内容，供 auto-code-bot 进行自我改进和开发。工程将保持 mono-repo 结构，使用 pnpm 管理，CLI 已基本可用，重点在 MCP 服务的实现与多包发布流程。
+> 本规格描述当前工程需要开发的内容，供 auto-staff 进行自我改进和开发。工程将保持 mono-repo 结构，使用 pnpm 管理，CLI 已基本可用，重点在 MCP 服务的实现与多包发布流程。
 
 ## Overview
 
-本工程是基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念的全自动编程系统（auto-code-bot toolkit）。采用 **mono-repo** 结构，包含：
+本工程是基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念的全自动编程系统（auto-staff toolkit）。采用 **mono-repo** 结构，包含：
 
-- **CLI 包（auto-code-bot）**：已基本可用，用于在本地驱动 opencode 子进程执行任务。
+- **CLI 包（auto-staff）**：已基本可用，用于在本地驱动 opencode 子进程执行任务。
 - **MCP 包（auto-code-mcp）**：待开发，用于在 Cursor / Claude 等环境中以 MCP 服务形式暴露能力，方便在 IDE 内直接调用。
 
 目标是通过本规格驱动：完善 mono-repo 与 pnpm 配置、实现并发布 MCP 服务、统一多包构建与发布流程，使工具既能通过 CLI 使用，也能通过 MCP 在 IDE 中提供服务。
@@ -20,10 +20,10 @@
 - **语言**: TypeScript（各包独立 tsconfig，根目录项目引用）
 
 ### CLI 包（packages/cli）
-- **名称**: `auto-code-bot`
+- **名称**: `auto-staff`
 - **运行时**: Node.js，ESM（`"type": "module"`）
 - **依赖**: chalk、commander、ora（版本由 catalog 统一）
-- **入口**: `dist/auto-dev.js`，bin 为 `auto-code-bot`
+- **入口**: `dist/auto-dev.js`，bin 为 `auto-staff`
 
 ### MCP 包（packages/mcp）
 - **名称**: `auto-code-mcp`
@@ -41,7 +41,7 @@
 ### CLI 包（已可用，可做小幅改进）
 - 支持指定项目目录、`--ulw`、`--model`、`--agent`、`--max-iterations`、`--extend`、`--config`、`--spec`、`--desc`、`--package-manager`、`--git-branch` 等参数
 - 工作流：读取 `docs/app_spec.md` + task.json + git，初始化/检查 git（develop 分支），回归验证，拓扑执行任务，实现→验证→提交，更新 task.json 与 progress
-- 配置文件 `auto-code-bot.json` 支持 model、packageManager、agent、ulw、maxIterations、gitBranch
+- 配置文件 `auto-staff.json` 支持 model、packageManager、agent、ulw、maxIterations、gitBranch
 - 如需与 MCP 共享逻辑，可考虑从 CLI 中抽取共享模块供 MCP 依赖（可选，按需做）
 
 ### MCP 包（待开发）
@@ -61,7 +61,7 @@
 |--------|------|------|
 | `auto_dev_status` | `project_dir`（必填，目标项目绝对或相对路径） | 返回当前阶段（need-spec / need-tasks / execute）、任务进度（passing/total）、各分类统计、最近 progress 摘要。用于 AI 查询「做到哪一步了」。 |
 | `auto_dev_run_one_task` | `project_dir`（必填），`options`（可选：model、ulw 等） | 仅执行**下一个未完成任务**一次：在服务端 spawn 一次 opencode session，按 AGENTS.md 完成单任务后返回。不阻塞 MCP 会话；若单次执行时间较长，可返回「已启动，请稍后通过 auto_dev_status 查看结果」。 |
-| `auto_dev_start` | `project_dir`（必填），`options`（可选：model、ulw、maxIterations、extend 等） | 在服务端**非阻塞**启动全自动循环（与 CLI `auto-code-bot <dir> --ulw` 等价）。返回「已启动，请通过 auto_dev_status 轮询进度」。避免长时间占用 MCP 连接。 |
+| `auto_dev_start` | `project_dir`（必填），`options`（可选：model、ulw、maxIterations、extend 等） | 在服务端**非阻塞**启动全自动循环（与 CLI `auto-staff <dir> --ulw` 等价）。返回「已启动，请通过 auto_dev_status 轮询进度」。避免长时间占用 MCP 连接。 |
 
 **Resources（可选）**
 
@@ -73,7 +73,7 @@
 
 **实现约定**
 
-- MCP 服务内部复用 CLI 包（或 core）的现有逻辑：phase 检测、task 解析、opencode 调用等，通过依赖 `auto-code-bot` 或共享 core 模块实现，不重复造轮子。
+- MCP 服务内部复用 CLI 包（或 core）的现有逻辑：phase 检测、task 解析、opencode 调用等，通过依赖 `auto-staff` 或共享 core 模块实现，不重复造轮子。
 - `auto_dev_run_one_task` 对应「只跑下一未完成任务」的单次 session，需从 agent 中抽成可复用函数（若尚未存在）。
 - `auto_dev_start` 必须以非阻塞方式启动全量循环（如子进程或后台任务），通过 `auto_dev_status` 查询是否完成或当前进度。
 
@@ -84,7 +84,7 @@
   - `pnpm changeset` 创建变更
   - `pnpm changeset version` 更新版本号
   - `pnpm changeset publish` 发布（或按需单独发布某一包）
-- **目录与命名**：保持 `packages/cli`（auto-code-bot）、`packages/mcp`（auto-code-mcp），与 multi-package-publishing.md 一致
+- **目录与命名**：保持 `packages/cli`（auto-staff）、`packages/mcp`（auto-code-mcp），与 multi-package-publishing.md 一致
 
 ## 配置与约定
 
@@ -108,9 +108,9 @@
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
-      "args": ["path/to/auto-code-bot/packages/mcp/dist/index.js"]
+      "args": ["path/to/auto-staff/packages/mcp/dist/index.js"]
     }
   }
 }
@@ -129,7 +129,7 @@
    - 若配置了 `pnpm lint`，须通过
 
 2. **功能验证（CLI 任务）**
-   - 在示例项目或 fixtures 上运行 `auto-code-bot`（或 `pnpm dev` 下的 CLI），验证参数、配置文件、spec 路径等行为符合预期
+   - 在示例项目或 fixtures 上运行 `auto-staff`（或 `pnpm dev` 下的 CLI），验证参数、配置文件、spec 路径等行为符合预期
    - 无异常退出与明显错误输出
 
 3. **功能验证（MCP 任务）**

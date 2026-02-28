@@ -1,10 +1,10 @@
-# Project Status - auto-code-bot
+# Project Status - auto-staff
 
 > Last Updated: 2026-02-28
 
 ## Project Overview
 
-**Project Name**: auto-code-bot  
+**Project Name**: auto-staff  
 **NPM Packages**:
 - Core: `@varlinor/autostaff-core` (v0.1.0)
 - Code Agent: `auto-code` (v0.1.0)
@@ -102,7 +102,7 @@ autostaff/
 
 ```
 pnpm-workspace.yaml + TypeScript Project References
-├── packages/cli/  (auto-code-bot)
+├── packages/cli/  (auto-staff)
 └── packages/mcp/  (auto-code-mcp)
 ```
 
@@ -154,7 +154,7 @@ export function topologicalSort(tasks: Task[]): Task[]
 ### 5. Configuration Priority
 
 ```
-CLI Options > Config File (auto-code-bot.json) > Hardcoded Defaults
+CLI Options > Config File (auto-staff.json) > Hardcoded Defaults
 ```
 
 ### 6. Default Model
@@ -196,7 +196,7 @@ Phase 4: 执行任务 (--ulw)
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
 | `[project-dir]` | - | Working directory | `.` |
-| `--config` | `-c` | Config file path | `auto-code-bot.json` |
+| `--config` | `-c` | Config file path | `auto-staff.json` |
 | `--model` | `-m` | Model (provider/model) | config / minimax(...) |
 | `--agent` | `-a` | Agent name | config / default |
 | `--max-iterations` | - | Max iterations | unlimited |
@@ -208,7 +208,7 @@ Phase 4: 执行任务 (--ulw)
 | `--package-manager` | - | npm/pnpm/yarn/bun | config / npm |
 | `--git-branch` | - | Git branch | config / develop |
 | `--silent` | - | Silent mode: opencode output to file only | false |
-| `--log-file` | - | Log file path | auto-code-bot.log |
+| `--log-file` | - | Log file path | auto-staff.log |
 
 ---
 
@@ -270,7 +270,7 @@ npx tsx src/auto-dev.ts ./my-project --ulw --max-iterations 3
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
       "args": ["packages/mcp/dist/index.js"]
     }
@@ -282,7 +282,7 @@ npx tsx src/auto-dev.ts ./my-project --ulw --max-iterations 3
 
 ## Configuration File Format
 
-**File**: `auto-code-bot.json` (in project directory)
+**File**: `auto-staff.json` (in project directory)
 
 ```json
 {
@@ -360,7 +360,7 @@ npx tsx src/auto-dev.ts ./my-project --ulw --max-iterations 3
 
 **Completed Tasks**:
 
-1. **v0.2.1 发布**: 成功发布 auto-code-bot@0.2.1 和 auto-code-mcp@0.2.1 到 npm
+1. **v0.2.1 发布**: 成功发布 auto-staff@0.2.1 和 auto-code-mcp@0.2.1 到 npm
 
 2. **--init-only 修复**: 修复 `--init-only` 参数无效问题
    - 添加 `initOnly` 到 `AgentConfig` 接口

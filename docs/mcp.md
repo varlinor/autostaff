@@ -34,7 +34,7 @@ pnpm build
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
       "args": ["D:\\workspaces\\fe-workspace\\auto-bot\\packages\\mcp\\dist\\index.js"],
       "env": {}
@@ -50,7 +50,7 @@ pnpm build
 ```json
 {
   "mcpServers": {
-    "auto-code-bot": {
+    "auto-staff": {
       "command": "node",
       "args": ["D:/workspaces/fe-workspace/auto-bot/packages/mcp/dist/index.js"],
       "env": {}
