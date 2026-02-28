@@ -1,4 +1,4 @@
-# auto-code-bot CHANGELOG
+# auto-staff CHANGELOG
 
 ## 0.3.1
 

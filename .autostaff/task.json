@@ -1,76 +1,164 @@
 {
   "tasks": [
     {
-      "id": "task-docs-1",
+      "id": "task-arch-unify-1",
+      "type": "app",
+      "workspace": null,
+      "category": "refactor",
+      "description": "统一架构重构：将基础设施整合到 core 包",
+      "dependsOn": [],
+      "steps": [
+        "1. 创建 packages/core/src/client.ts - 统一的 OpenCodeClient 实现",
+        "2. 删除 packages/cli/src/client.ts - 改为 re-export from core",
+        "3. 删除 packages/code/src/client.ts - 改为 re-export from core",
+        "4. 移动 packages/cli/src/progress-ui.ts → packages/core/src/progress-ui.ts",
+        "5. 整合 packages/code/src/progress.ts → packages/core/src/progress.ts",
+        "6. 删除 packages/cli/src/progress.ts - 已被 core 替代",
+        "7. 删除 packages/cli/src/agent.ts - 已被 code/text agent 替代",
+        "8. 更新所有 agent 导入：直接从 @varlinor/autostaff-core 导入",
+        "9. 移除所有别名（CodeOpenCodeClient → OpenCodeClient）",
+        "10. VERIFY: pnpm build 所有包编译通过",
+        "11. VERIFY: pnpm test 所有测试通过（76/76）"
+      ],
+      "passes": true
+    },
+    {
+      "id": "task-docs-rename-1",
       "type": "app",
       "workspace": null,
       "category": "docs",
-      "description": "收集当前工程信息，更新 docs/project_status.md",
-      "dependsOn": [],
+      "description": "更新文档中的包名和 CLI 命令说明：auto-code-bot → auto-staff",
+      "dependsOn": ["task-arch-unify-1"],
       "steps": [
-        "1. 收集 packages 结构：core、code、text、cli、mcp 的 package.json 名称、版本、依赖关系",
-        "2. 收集 pnpm-workspace.yaml 和 catalog 配置",
-        "3. 更新 project_status.md：包架构图、各包职责、当前版本、依赖关系",
-        "4. 更新 project_status.md：task.json 和 progress.txt 已移至 .autostaff/ 目录",
-        "5. 更新 project_status.md：Repository 地址为 https://github.com/varlinor/autostaff",
-        "6. 更新 Session History 记录本次变更",
-        "7. VERIFY: project_status.md 内容与当前工程一致"
+        "1. 更新 README.md 中的包名引用（auto-code-bot → auto-staff）",
+        "2. 更新 README.md 中的 CLI 命令示例：npx auto-staff code <dir> [options]",
+        "3. 更新 README.md 中的 CLI 命令示例：npx auto-staff text <dir> [options]",
+        "4. 更新 README.md 中的配置文件名（auto-code-bot.json → auto-staff.json",
+        "5. 更新 README.md 中的日志文件名（auto-code-bot.log → auto-staff.log）",
+        "6. 更新 packages/cli/README.md 中的所有引用和命令示例",
+        "7. 更新 packages/cli/CHANGELOG.md 的标题和内容",
+        "8. VERIFY: 搜索确认无 auto-code-bot 残留（deprecated 警告除外）"
       ],
       "passes": true
     },
     {
-      "id": "task-changeset-1",
-      "type": "app",
-      "workspace": null,
-      "category": "functional",
-      "description": "更改 changesets 配置：cli/code/text 同版本发布，core 变更时 dependents 同步更新",
-      "dependsOn": [],
-      "steps": [
-        "1. 在 .changeset/config.json 中配置 fixed 数组",
-        "2. 将 auto-bot、auto-code、auto-text 放入同一 fixed 组，实现同版本发布",
-        "3. 确认 updateInternalDependencies 为 patch，使 core 变更时 cli、mcp、code、text 自动获得 patch 更新",
-        "4. 可选：将 auto-code-mcp 加入 fixed 组，或保持独立版本",
-        "5. VERIFY: pnpm changeset 可正常创建变更",
-        "6. VERIFY: 配置符合预期（同组包同版本、依赖更新联动）"
-      ],
-      "passes": true
-    },
-    {
-      "id": "task-readme-1",
+      "id": "task-cli-commands-1",
       "type": "app",
       "workspace": null,
       "category": "docs",
-      "description": "更新根目录 README：着重说明当前以 CLI 为主，MCP 功能待验证",
-      "dependsOn": [],
+      "description": "更新 CLI 子命令说明：code 和 text 命令的使用文档",
+      "dependsOn": ["task-arch-unify-1"],
       "steps": [
-        "1. 在 README 顶部或「核心特性」后增加「当前状态」或「使用说明」段落",
-        "2. 明确说明：当前以 CLI 为主要使用方式，功能完整、推荐使用",
-        "3. 明确说明：MCP 功能已实现，但待进一步验证，建议谨慎使用",
-        "4. 保留 MCP 配置说明，但标注为「实验性」或「待验证」",
-        "5. VERIFY: README 表述清晰，用户能理解当前推荐用法"
+        "1. 在 README.md 中添加 code 命令说明：代码开发和任务执行",
+        "2. 在 README.md 中添加 text 命令说明：文本内容生成和验证",
+        "3. 更新 README.md 中的命令格式：auto-staff <command> <dir> [options]",
+        "4. 添加 code 命令示例：npx auto-staff code . --ulw --max-iterations 2",
+        "5. 添加 text 命令示例：npx auto-staff text ./content --model deepseek/deepseek-chat",
+        "6. 更新 --init-only 参数说明（适用于 code 命令）",
+        "7. 更新 --verbose 和 --log-file 参数说明（两个命令通用）",
+        "8. VERIFY: npx auto-staff --help 显示 code 和 text 子命令",
+        "9. VERIFY: npx auto-staff code --help 显示 code 命令参数",
+        "10. VERIFY: npx auto-staff text --help 显示 text 命令参数"
       ],
-      "passes": true
+      "passes": false
     },
     {
-      "id": "task-test-1",
+      "id": "task-import-fix-1",
       "type": "app",
       "workspace": null,
-      "category": "test",
-      "description": "收集 cli/code/core/text 实现情况，针对文本生成给出测试用例",
-      "dependsOn": ["task-docs-1"],
+      "category": "refactor",
+      "description": "修复导入语句：移除 .js 后缀，使用 TypeScript 规范",
+      "dependsOn": ["task-arch-unify-1"],
       "steps": [
-        "1. 收集 core 包实现：progress.ts（topologicalSort、getExecutableTasks、getNextExecutableTask、parseTasks）、phase.ts（detectPhase、getTaskPath）、workspace.ts、git.ts",
-        "2. 收集 code 包实现：runCodeAgent、createCodeClient、agent 逻辑",
-        "3. 收集 text 包实现：runTextBot、TextValidator（validate、countWords、hasFrontMatter、hasHeadings、findContentFiles）",
-        "4. 收集 cli 包实现：子命令分发、code/text 调用",
-        "5. 参考 test/unit/progress.test.ts、phase.test.ts 的测试结构",
-        "6. 编写 test/unit/validator.test.ts：TextValidator 单元测试（countWords、hasFrontMatter、hasHeadings、validate 各场景）",
-        "7. 编写 test/unit/text-phase.test.ts：detectTextPhase 逻辑测试（若 text 使用独立 phase 检测）",
-        "8. 可选：为 runTextBot 编写集成测试占位或 mock 测试",
-        "9. VERIFY: pnpm test 通过",
-        "10. VERIFY: 新增测试覆盖 TextValidator 核心逻辑"
+        "1. 搜索 packages/cli/src/ 中所有带 .js 后缀的导入",
+        "2. 移除本地导入的 .js 后缀（例如 ./client.js → ./client）",
+        "3. 移除 ./progress-ui.js → ./progress-ui",
+        "4. 移除 ./prompts.js → ./prompts",
+        "5. 移除 ./agent.js → ./agent",
+        "6. 保留 npm 包的导入（例如 from \"chalk\"）",
+        "7. 保留 workspace 包的导入（例如 from \"auto-code\"）",
+        "8. 更新 packages/cli/src/progress.ts 中的导入示例（文档注释）",
+        "9. VERIFY: pnpm build 编译无错误",
+        "10. VERIFY: TypeScript 无导入相关警告"
       ],
-      "passes": true
+      "passes": false
+    },
+    {
+      "id": "task-config-rename-1",
+      "type": "app",
+      "workspace": null,
+      "category": "refactor",
+      "description": "更新配置文件名：auto-code-bot.json → auto-staff.config",
+      "dependsOn": ["task-arch-unify-1"],
+      "steps": [
+        "1. 更新 packages/cli/src/index.ts 中的默认配置文件名",
+        "2. 更新 packages/cli/src/auto-dev.ts 中的默认配置文件名（废弃文件）",
+        "3. 更新 packages/cli/src/client.ts 中的默认日志文件名",
+        "4. 更新 packages/code/src/client.ts 中的默认日志文件名",
+        "5. 更新 packages/text/src/agent.ts 中的默认日志文件名（如适用）",
+        "6. 更新文档中的配置文件名说明",
+        "7. 更新 packages/cli/README.md 中的配置示例",
+        "8. 提供配置迁移指南（旧 → 新）",
+        "9. VERIFY: 测试 CLI 能否正确读取新配置文件",
+        "10. VERIFY: 向后兼容旧配置文件名（可选，建议显示迁移提示）"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-cli-entry-1",
+      "type": "app",
+      "workspace": null,
+      "category": "docs",
+      "description": "确认 CLI 入口文件：index.ts 为主入口，标记 auto-dev.ts 为废弃",
+      "dependsOn": ["task-arch-unify-1"],
+      "steps": [
+        "1. 确认 packages/cli/src/index.ts 是主要入口文件",
+        "2. 确认 packages/cli/src/auto-dev.ts 已标记 @deprecated",
+        "3. 更新 packages/cli/README.md 中的入口说明",
+        "4. 更新 packages/cli/package.json 中的 bin 字段（如需要）",
+        "5. 确保所有文档指向 index.ts 而非 auto-dev.ts",
+        "6. 在 README 中说明 auto-dev.ts 已废弃，使用 auto-staff",
+        "7. VERIFY: npx auto-staff --help 显示正确信息",
+        "8. VERIFY: package.json bin 指向 dist/index.js",
+        "9. VERIFY: npx auto-code-bot 显示废弃警告"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-cleanup-1",
+      "type": "app",
+      "workspace": null,
+      "category": "chore",
+      "description": "清理临时文件和备份文件",
+      "dependsOn": ["task-arch-unify-1"],
+      "steps": [
+        "1. 删除 packages/cli/src/agent.ts.bak 备份文件",
+        "2. 删除 test/temp-progress/ 临时测试目录",
+        "3. 删除所有 *.bak 文件",
+        "4. 删除所有 *.tmp 文件",
+        "5. 运行 pnpm run lint 检查代码质量",
+        "6. VERIFY: git status 只显示必要的修改",
+        "7. VERIFY: 工作目录干净，无临时文件"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-readme-update-1",
+      "type": "app",
+      "workspace": null,
+      "category": "docs",
+      "description": "更新根目录 README.md：反映新的架构和包结构",
+      "dependsOn": ["task-arch-unify-1", "task-docs-rename-1"],
+      "steps": [
+        "1. 更新项目介绍：说明 auto-staff 是统一的自动化框架",
+        "2. 添加架构图：展示 core、cli、code、text、mcp 包的关系",
+        "3. 说明 core 包提供的统一基础设施（OpenCodeClient、progress、UI 函数）",
+        "4. 更新安装包列表：@varlinor/autostaff-core、auto-staff、auto-code、auto-text",
+        "5. 添加快速开始指南：使用 code 和 text 子命令",
+        "6. 添加架构说明：为什么整合到 core 包",
+        "7. VERIFY: README 清晰易懂，新手能理解架构"
+      ],
+      "passes": false
     }
   ]
 }

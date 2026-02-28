@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
-const SERVER_NAME = "auto-code-bot";
+const SERVER_NAME = "auto-staff";
 const SERVER_VERSION = packageJson.version;
 
 function createServer(): McpServer {

@@ -159,7 +159,7 @@ export function runOneTask(
 
   // Always run from project root (resolvedDir) to ensure access to AGENTS.md and task.json
   // The workspace path is passed via CLI argument
-  const fullCommand = `pnpm exec auto-code-bot "${resolvedDir}" --model "${model}" ${ulwFlag} ${finalMaxIter} ${workspaceArg}`;
+  const fullCommand = `pnpm exec auto-staff "${resolvedDir}" --model "${model}" ${ulwFlag} ${finalMaxIter} ${workspaceArg}`;
 
   try {
     const child = spawn(fullCommand, [], {
@@ -236,7 +236,7 @@ export function runFullLoop(
   const maxIterFlag = options.maxIterations ? `--max-iterations ${options.maxIterations}` : "";
   const agentFlag = options.agent ? `--agent "${options.agent}"` : "";
   
-  const cliCommand = `"auto-code-bot" "${resolvedDir}" --model "${model}" ${ulwFlag} ${extendFlag} ${maxIterFlag} ${agentFlag}`;
+  const cliCommand = `"auto-staff" "${resolvedDir}" --model "${model}" ${ulwFlag} ${extendFlag} ${maxIterFlag} ${agentFlag}`;
   const fullCommand = `pnpm exec ${cliCommand}`;
 
   try {
@@ -256,7 +256,7 @@ export function runFullLoop(
     });
 
     child.on("error", (err: Error) => {
-      process.stderr.write(`Error spawning auto-code-bot: ${err.message}\n`);
+      process.stderr.write(`Error spawning auto-staff: ${err.message}\n`);
     });
 
     child.unref();
