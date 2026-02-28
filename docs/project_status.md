@@ -1,15 +1,18 @@
 # Project Status - auto-code-bot
 
-> Last Updated: 2026-02-24
+> Last Updated: 2026-02-28
 
 ## Project Overview
 
 **Project Name**: auto-code-bot  
-**NPM Packages**: 
-- CLI: `auto-code-bot`
-- MCP: `auto-code-mcp`
-**Repository**: https://github.com/varlinor/code-bot  
-**Current Version**: 0.2.1
+**NPM Packages**:
+- Core: `@varlinor/autostaff-core` (v0.1.0)
+- Code Agent: `auto-code` (v0.1.0)
+- Text Agent: `auto-text` (v0.1.0)
+- CLI: `auto-bot` (v0.4.0)
+- MCP: `auto-code-mcp` (v0.3.0)
+**Repository**: https://github.com/varlinor/autostaff
+**Current Version**: 0.3.0
 **License**: MIT
 
 基于 [Anthropic 长时间运行 Agent](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) 理念构建的全自动编程系统。通过 **opencode** 子进程驱动，跨多个上下文窗口持续增量开发，直到项目完成。
@@ -18,7 +21,7 @@
 
 ## Current Status
 
-### Phase: Production Ready (v0.2.1)
+### Phase: Production Ready (v0.3.0)
 
 项目已实现 **Monorepo 结构 + MCP 服务 + 阶段性工作流 + 静默模式**，所有核心功能已实现并通过测试。
 
@@ -37,25 +40,46 @@
 ## Key Files
 
 ```
-auto-code-bot/
+autostaff/
 ├── pnpm-workspace.yaml              # pnpm 工作区配置 (含 catalog)
 ├── packages/
-│   ├── cli/                        # CLI 包 (auto-code-bot)
-│   │   ├── package.json            # name: auto-code-bot
+│   ├── core/                       # 核心包 (@varlinor/autostaff-core)
+│   │   ├── package.json           # name: @varlinor/autostaff-core
 │   │   └── src/
-│   │       ├── auto-dev.ts         # CLI 入口
-│   │       ├── agent.ts            # Agent 核心逻辑
+│   │       ├── index.ts            # 核心入口
+│   │       ├── progress.ts        # 任务管理 + topological sort
+│   │       ├── phase.ts            # 阶段检测
+│   │       ├── workspace.ts        # 工作区检测
+│   │       ├── git.ts              # Git 操作
+│   │       ├── types.ts            # 类型定义
+│   │       └── executor.ts         # 执行器框架
+│   ├── code/                       # Code Agent 包 (auto-code)
+│   │   ├── package.json            # name: auto-code
+│   │   └── src/
+│   │       ├── index.ts            # 入口
+│   │       └── agent.ts            # Code agent 逻辑
+│   ├── text/                       # Text Agent 包 (auto-text)
+│   │   ├── package.json            # name: auto-text
+│   │   └── src/
+│   │       ├── index.ts            # 入口
+│   │       └── agent.ts            # Text agent 逻辑
+│   ├── cli/                        # CLI 包 (auto-bot)
+│   │   ├── package.json            # name: auto-bot
+│   │   └── src/
+│   │       ├── index.ts            # CLI 入口
+│   │       ├── auto-dev.ts         # 主程序
+│   │       ├── agent.ts            # Agent 调度
 │   │       ├── client.ts           # opencode 子进程封装
-│   │       ├── progress.ts         # 任务进度 + topological sort
-│   │       ├── prompts.ts          # Prompt 加载
-│   │       ├── security.ts         # 命令白名单
-│   │       └── workspace.ts        # 项目类型检测
+│   │       └── progress-ui.ts      # 进度 UI
 │   └── mcp/                        # MCP 服务包 (auto-code-mcp)
 │       ├── package.json            # name: auto-code-mcp
 │       └── src/
 │           ├── index.ts            # MCP 入口
 │           └── lib/
 │               └── project.ts      # 项目状态逻辑
+├── .autostaff/                     # 内部状态目录
+│   ├── task.json                   # 任务清单
+│   └── progress.txt                # 进度记录
 ├── docs/
 │   ├── app_spec.md                # App 规格模板
 │   ├── workflow.md                # 工作流指南
@@ -65,8 +89,6 @@ auto-code-bot/
 ├── skills/
 │   ├── app-spec-generator.md      # 生成 app_spec skill
 │   └── task-auditor.md            # 审核 task.json skill
-├── prompts/
-│   └── AGENTS.md                  # Agent 工作流规则
 └── test/
     ├── fixtures/                  # 测试数据
     └── unit/                      # 单元测试
@@ -383,4 +405,23 @@ fdacd54 feat: add --silent mode for log file output
 64f46a8 fix: separate auto-bot and opencode output in silent mode
 ```
 
+### 2026-02-28 Session
+
+**Completed Tasks**:
+
+1. **Build 修复**: 修复 packages/code 构建错误
+   - 修复 import 语句：`detectCodePhase` → `detectPhase`
+   - 移除不存在的 `loadProgress`、`saveProgress` 导入
+
+2. **project_status.md 更新**: 更新项目状态文档
+   - 更新版本号：v0.3.0
+   - 更新包列表：添加 core、code、text 包信息
+   - 更新 .autostaff/ 目录说明
+   - 更新仓库地址：https://github.com/varlinor/autostaff
+
+**Current State**: 4 任务待执行，build 验证通过。
+
+---
+
+**Previous Session (2026-02-24)** - See above for details.
 **Current State**: All requested features implemented and verified.

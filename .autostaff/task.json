@@ -1,0 +1,76 @@
+{
+  "tasks": [
+    {
+      "id": "task-docs-1",
+      "type": "app",
+      "workspace": null,
+      "category": "docs",
+      "description": "收集当前工程信息，更新 docs/project_status.md",
+      "dependsOn": [],
+      "steps": [
+        "1. 收集 packages 结构：core、code、text、cli、mcp 的 package.json 名称、版本、依赖关系",
+        "2. 收集 pnpm-workspace.yaml 和 catalog 配置",
+        "3. 更新 project_status.md：包架构图、各包职责、当前版本、依赖关系",
+        "4. 更新 project_status.md：task.json 和 progress.txt 已移至 .autostaff/ 目录",
+        "5. 更新 project_status.md：Repository 地址为 https://github.com/varlinor/autostaff",
+        "6. 更新 Session History 记录本次变更",
+        "7. VERIFY: project_status.md 内容与当前工程一致"
+      ],
+      "passes": true
+    },
+    {
+      "id": "task-changeset-1",
+      "type": "app",
+      "workspace": null,
+      "category": "functional",
+      "description": "更改 changesets 配置：cli/code/text 同版本发布，core 变更时 dependents 同步更新",
+      "dependsOn": [],
+      "steps": [
+        "1. 在 .changeset/config.json 中配置 fixed 数组",
+        "2. 将 auto-bot、auto-code、auto-text 放入同一 fixed 组，实现同版本发布",
+        "3. 确认 updateInternalDependencies 为 patch，使 core 变更时 cli、mcp、code、text 自动获得 patch 更新",
+        "4. 可选：将 auto-code-mcp 加入 fixed 组，或保持独立版本",
+        "5. VERIFY: pnpm changeset 可正常创建变更",
+        "6. VERIFY: 配置符合预期（同组包同版本、依赖更新联动）"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-readme-1",
+      "type": "app",
+      "workspace": null,
+      "category": "docs",
+      "description": "更新根目录 README：着重说明当前以 CLI 为主，MCP 功能待验证",
+      "dependsOn": [],
+      "steps": [
+        "1. 在 README 顶部或「核心特性」后增加「当前状态」或「使用说明」段落",
+        "2. 明确说明：当前以 CLI 为主要使用方式，功能完整、推荐使用",
+        "3. 明确说明：MCP 功能已实现，但待进一步验证，建议谨慎使用",
+        "4. 保留 MCP 配置说明，但标注为「实验性」或「待验证」",
+        "5. VERIFY: README 表述清晰，用户能理解当前推荐用法"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-test-1",
+      "type": "app",
+      "workspace": null,
+      "category": "test",
+      "description": "收集 cli/code/core/text 实现情况，针对文本生成给出测试用例",
+      "dependsOn": ["task-docs-1"],
+      "steps": [
+        "1. 收集 core 包实现：progress.ts（topologicalSort、getExecutableTasks、getNextExecutableTask、parseTasks）、phase.ts（detectPhase、getTaskPath）、workspace.ts、git.ts",
+        "2. 收集 code 包实现：runCodeAgent、createCodeClient、agent 逻辑",
+        "3. 收集 text 包实现：runTextBot、TextValidator（validate、countWords、hasFrontMatter、hasHeadings、findContentFiles）",
+        "4. 收集 cli 包实现：子命令分发、code/text 调用",
+        "5. 参考 test/unit/progress.test.ts、phase.test.ts 的测试结构",
+        "6. 编写 test/unit/validator.test.ts：TextValidator 单元测试（countWords、hasFrontMatter、hasHeadings、validate 各场景）",
+        "7. 编写 test/unit/text-phase.test.ts：detectTextPhase 逻辑测试（若 text 使用独立 phase 检测）",
+        "8. 可选：为 runTextBot 编写集成测试占位或 mock 测试",
+        "9. VERIFY: pnpm test 通过",
+        "10. VERIFY: 新增测试覆盖 TextValidator 核心逻辑"
+      ],
+      "passes": false
+    }
+  ]
+}
