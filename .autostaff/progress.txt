@@ -98,4 +98,24 @@ JK|- task-import-fix-1: Fix imports - remove .js extensions, use TypeScript spec
 - VERIFIED: auto-staff --help shows code and text subcommands
 - VERIFIED: auto-staff code --help shows code command parameters
 - VERIFIED: auto-staff text --help shows text command parameters
-- Build passes, no TypeScript errors
+TQ|- Build passes, no TypeScript errors
+
+---
+
+## 2026-03-01
+
+### Completed Tasks
+- task-readme-update-1: Update root README with architecture design principles ✅
+
+### In Progress
+- (none)
+
+### Pending
+- (see .autostaff/task.json)
+
+### Notes
+- Added architecture design section explaining why integration to core package
+- Documented core package unified infrastructure (OpenCodeClient, Progress, Workspace, Git)
+- Listed architecture benefits: code reuse, consistency, maintainability, testability
+- Updated package.json MCP scripts to use correct package name (auto-mcp)
+- task-readme-update-1 marked as passing
