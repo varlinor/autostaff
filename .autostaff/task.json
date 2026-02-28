@@ -102,7 +102,7 @@
         "9. VERIFY: 测试 CLI 能否正确读取新配置文件",
         "10. VERIFY: 向后兼容旧配置文件名（可选，建议显示迁移提示）"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-cli-entry-1",

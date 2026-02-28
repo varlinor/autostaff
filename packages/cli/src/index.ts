@@ -36,7 +36,7 @@ interface FileConfig {
 }
 
 function loadConfig(projectDir: string): FileConfig {
-  const configPath = path.join(projectDir, "auto-staff.json");
+  const configPath = path.join(projectDir, "auto-staff.config");
   try {
     if (fs.existsSync(configPath)) {
       return JSON.parse(fs.readFileSync(configPath, "utf-8"));
