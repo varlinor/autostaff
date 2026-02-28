@@ -99,6 +99,7 @@ auto-staff/                         # 项目根目录 (Monorepo)
 ├── docs/                           # 文档
 │   ├── app_spec.md                # 项目规格模板
 │   ├── ROADMAP.md                 # 版本路线图
+│   ├── project_status.md          # 项目状态报告
 │   ├── mcp.md                     # MCP 服务器配置指南
 │   └── workflow.md                 # 工作流指南
 ├── packages/                       # 子包
