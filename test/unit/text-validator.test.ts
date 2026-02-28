@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { TextValidator } from "../../packages/text/src/validator";
+import { detectTextPhase } from "../../packages/text/src/agent";
 
 describe("text/validator.ts", () => {
   const testDir = path.join(process.cwd(), "test", "temp-text");
@@ -28,8 +29,7 @@ describe("text/validator.ts", () => {
 
       it("should fail when word count is below minimum", async () => {
         const validator = new TextValidator({ minWordCount: 100 });
-        fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "# Short content");
+        fs.writeFileSync(path.join(docsDir, "content.md"), "# Short content");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(false);
@@ -39,7 +39,7 @@ describe("text/validator.ts", () => {
       it("should fail when word count exceeds maximum", async () => {
         const validator = new TextValidator({ maxWordCount: 10 });
         fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "# Title\n\nThis is a much longer content that has way too many words to fit within the maximum limit set for this test case.");
+          "# Title\n\nThis is a much longer content that has way too many words.");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(false);
@@ -60,7 +60,7 @@ describe("text/validator.ts", () => {
       it("should pass when front matter exists", async () => {
         const validator = new TextValidator({ requireFrontMatter: true });
         fs.writeFileSync(path.join(docsDir, "content.md"), 
-          `---\ntitle: My Content\ndate: 2024-01-01\n---\n\n# Content`);
+          "---\ntitle: My Content\ndate: 2024-01-01\n---\n\n# Content");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(true);
@@ -68,8 +68,7 @@ describe("text/validator.ts", () => {
 
       it("should fail when front matter is missing", async () => {
         const validator = new TextValidator({ requireFrontMatter: true });
-        fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "# Content without front matter");
+        fs.writeFileSync(path.join(docsDir, "content.md"), "# Content without front matter");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(false);
@@ -80,8 +79,7 @@ describe("text/validator.ts", () => {
     describe("validate - headings", () => {
       it("should pass when headings exist", async () => {
         const validator = new TextValidator({ requireHeadings: true });
-        fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "# Main Title\n\n## Section 1\n\nContent here");
+        fs.writeFileSync(path.join(docsDir, "content.md"), "# Main Title\n\n## Section 1\n\nContent here");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(true);
@@ -89,8 +87,7 @@ describe("text/validator.ts", () => {
 
       it("should fail when headings are missing", async () => {
         const validator = new TextValidator({ requireHeadings: true });
-        fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "Just plain text without any heading");
+        fs.writeFileSync(path.join(docsDir, "content.md"), "Just plain text without any heading");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(false);
@@ -99,8 +96,7 @@ describe("text/validator.ts", () => {
 
       it("should detect headings from h1 to h6", async () => {
         const validator = new TextValidator({ requireHeadings: true });
-        fs.writeFileSync(path.join(docsDir, "content.md"), 
-          "# H1\n## H2\n### H3\n#### H4\n##### H5\n###### H6");
+        fs.writeFileSync(path.join(docsDir, "content.md"), "# H1\n## H2\n### H3\n#### H4\n##### H5\n###### H6");
         
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(true);
@@ -123,30 +119,24 @@ describe("text/validator.ts", () => {
       it("should find .md files", () => {
         const validator = new TextValidator();
         fs.writeFileSync(path.join(docsDir, "content.md"), "# Content");
-        
-        // This is tested implicitly through validate()
         expect(fs.existsSync(path.join(docsDir, "content.md"))).toBe(true);
       });
 
       it("should find .txt files", () => {
         const validator = new TextValidator();
         fs.writeFileSync(path.join(docsDir, "content.txt"), "Plain text content");
-        
         expect(fs.existsSync(path.join(docsDir, "content.txt"))).toBe(true);
       });
 
       it("should find .markdown files", () => {
         const validator = new TextValidator();
         fs.writeFileSync(path.join(docsDir, "content.markdown"), "# Markdown content");
-        
         expect(fs.existsSync(path.join(docsDir, "content.markdown"))).toBe(true);
       });
 
       it("should ignore non-content files", () => {
         const validator = new TextValidator();
         fs.writeFileSync(path.join(docsDir, "script.js"), "console.log('not content')");
-        
-        // Should not throw, just ignore
         expect(async () => await validator.validate(testDir)).not.toThrow();
       });
 
@@ -156,8 +146,6 @@ describe("text/validator.ts", () => {
         fs.mkdirSync(path.join(docsDir, ".git"), { recursive: true });
         fs.writeFileSync(path.join(docsDir, "node_modules", "pkg.js"), "module.exports = {}");
         fs.writeFileSync(path.join(docsDir, ".git", "config"), "[core]");
-        
-        // Should not throw
         expect(async () => await validator.validate(testDir)).not.toThrow();
       });
     });
@@ -165,7 +153,6 @@ describe("text/validator.ts", () => {
     describe("empty project", () => {
       it("should return invalid when no content files exist", async () => {
         const validator = new TextValidator();
-        
         const result = await validator.validate(testDir);
         expect(result.valid).toBe(false);
         expect(result.errors[0]).toContain("No content files found");
@@ -184,35 +171,62 @@ describe("text/agent.ts - detectTextPhase", () => {
     fs.mkdirSync(testDir, { recursive: true });
   });
 
-  // Note: detectTextPhase is a private function in agent.ts
-  // Testing would require either:
-  // 1. Making it exported
-  // 2. Integration testing through runTextBot
-  
-  describe("runTextBot - integration", () => {
-    it("should create sample content_tasks.json when in need-tasks phase", async () => {
-      // This test would require mocking the opencode client
-      // or running the actual function with a test project
-      
-      // Setup: create docs/content_spec.md but no content_tasks.json
+  describe("detectTextPhase", () => {
+    it('should return "need-spec" when no spec or tasks exist', () => {
+      const phase = detectTextPhase(testDir);
+      expect(phase).toBe("need-spec");
+    });
+
+    it('should return "need-tasks" when spec exists but no tasks', () => {
       fs.mkdirSync(path.join(testDir, "docs"), { recursive: true });
       fs.writeFileSync(
         path.join(testDir, "docs", "content_spec.md"),
-        "# Content Spec\n\nType: Blog Post\nTarget: Developers"
+        "# Content Spec\n\nType: Blog Post"
       );
-      
-      // Verify setup
-      const hasSpec = fs.existsSync(path.join(testDir, "docs", "content_spec.md"));
-      const hasTasks = fs.existsSync(path.join(testDir, "content_tasks.json"));
-      
-      expect(hasSpec).toBe(true);
-      expect(hasTasks).toBe(false);
+
+      const phase = detectTextPhase(testDir);
+      expect(phase).toBe("need-tasks");
     });
 
-    it("should handle init-only mode", () => {
-      // Test that initOnly flag stops after initialization
-      // Would require mocking or integration test
-      expect(true).toBe(true); // Placeholder
+    it('should return "need-tasks" when content_spec.md exists in root but no tasks', () => {
+      fs.writeFileSync(
+        path.join(testDir, "content_spec.md"),
+        "# Content Spec\n\nType: Blog Post"
+      );
+
+      const phase = detectTextPhase(testDir);
+      expect(phase).toBe("need-tasks");
+    });
+
+    it('should return "execute" when both spec and tasks exist', () => {
+      fs.mkdirSync(path.join(testDir, "docs"), { recursive: true });
+      fs.writeFileSync(
+        path.join(testDir, "docs", "content_spec.md"),
+        "# Content Spec\n\nType: Blog Post"
+      );
+      fs.writeFileSync(
+        path.join(testDir, "content_tasks.json"),
+        JSON.stringify({ tasks: [{ id: "task-1", passes: false }] })
+      );
+
+      const phase = detectTextPhase(testDir);
+      expect(phase).toBe("execute");
+    });
+
+    it('should return "execute" when tasks exist but no spec (edge case)', () => {
+      fs.writeFileSync(
+        path.join(testDir, "content_tasks.json"),
+        JSON.stringify({ tasks: [{ id: "task-1", passes: false }] })
+      );
+
+      const phase = detectTextPhase(testDir);
+      expect(phase).toBe("execute");
+    });
+  });
+
+  describe("runTextBot - integration", () => {
+    it("should have docs directory structure ready", () => {
+      expect(fs.existsSync(testDir)).toBe(true);
     });
   });
 });

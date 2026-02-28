@@ -42,9 +42,9 @@ export async function runTextBot(config: TextBotConfig): Promise<void> {
 
   fs.mkdirSync(projectDir, { recursive: true });
 
-  console.log("\n" + chalk.bold("═".repeat(70)));
-  console.log(chalk.bold("  AUTO-STAFF: Autonomous Text Content Creator"));
-  console.log(chalk.bold("═".repeat(70)));
+  console.log("\n" + chalk.bold("═".repeat(50)));
+  console.log(chalk.bold("    AUTO-STAFF: Autonomous Text Content Creator"));
+  console.log(chalk.bold("═".repeat(50)));
   console.log(`\n  Project: ${chalk.cyan(projectDir)}`);
   console.log(`  Model:   ${chalk.cyan(model || "minimax(Custom)/MiniMax-M2.5")}`);
   if (ulw) console.log(`  ULW:     ${chalk.yellow("enabled")}`);
@@ -164,7 +164,7 @@ export async function runTextBot(config: TextBotConfig): Promise<void> {
 /**
  * Detect phase for text content
  */
-function detectTextPhase(dir: string): "need-spec" | "need-tasks" | "execute" {
+export function detectTextPhase(dir: string): "need-spec" | "need-tasks" | "execute" {
   const hasSpec = 
     fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || 
     fs.existsSync(path.join(dir, "content_spec.md"));

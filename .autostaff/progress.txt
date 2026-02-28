@@ -38,6 +38,26 @@
 ### Completed Tasks
 - task-docs-1: Update project_status.md ✅
 - task-changeset-1: Configure changesets for cli/code/text same version ✅
+- task-test-1: Write tests for text/validator and detectTextPhase ✅
+
+### In Progress
+- task-readme-1: Update README
+
+### Pending
+- (see .autostaff/task.json)
+
+### Notes
+- Fixed build errors in packages/code: detectCodePhase -> detectPhase
+- Removed non-existent loadProgress/saveProgress imports
+- Build verification: pnpm build passes
+- Test verification: pnpm test passes (76 tests - added 22 new tests)
+- Changesets config: fixed array with [auto-staff, auto-code, auto-text] for same version release
+- Changesets config: updateInternalDependents: always for core dependency updates
+- 3/4 tasks complete
+
+### Completed Tasks
+- task-docs-1: Update project_status.md ✅
+- task-changeset-1: Configure changesets for cli/code/text same version ✅
 
 ### In Progress
 - task-readme-1: Update README

@@ -9,5 +9,5 @@
  * ```
  */
 
-export { runTextBot, type TextBotConfig } from "./agent.js";
+export { runTextBot, detectTextPhase, type TextBotConfig } from "./agent.js";
 export { TextValidator } from "./validator.js";

@@ -70,7 +70,7 @@
         "9. VERIFY: pnpm test 通过",
         "10. VERIFY: 新增测试覆盖 TextValidator 核心逻辑"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }
