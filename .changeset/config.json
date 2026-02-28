@@ -2,10 +2,10 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.2/schema.json",
   "changelog": ["@changesets/changelog-github", { "repo": "varlinor/autostaff" }],
   "commit": false,
-  "fixed": [
-    ["auto-code", "auto-text", "auto-staff"]
+  "fixed": [],
+  "linked": [
+    ["@varlinor/autostaff-core", "auto-code", "auto-text", "auto-staff", "auto-code-mcp"]
   ],
-  "linked": [],
   "access": "public",
   "baseBranch": "develop",
   "updateInternalDependencies": "patch",
