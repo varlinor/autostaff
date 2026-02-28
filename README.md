@@ -75,6 +75,26 @@ packages/
 └── mcp/            (auto-mcp)                    → 依赖 core
 ```
 
+### 架构设计原则：统一基础设施
+
+**为什么整合到 core 包？**
+
+auto-staff 采用分层架构设计，将所有 agent 共享的基础设施集中到 `@varlinor/autostaff-core` 包中：
+
+| 基础设施 | 说明 | 受益的包 |
+|----------|------|----------|
+| **OpenCodeClient** | 统一的 opencode 子进程管理、模型调用、会话管理 | cli, code, text, mcp |
+| **Progress 管理** | task.json 解析、进度跟踪、断点续传 | cli, code |
+| **Progress UI** | 进度展示、状态更新 | cli |
+| **Workspace 检测** | pnpm workspace 检测、目录切换 | cli, code |
+| **Git 操作** | 提交、分支管理 | cli |
+
+**架构优势**：
+- **代码复用**：避免重复实现，所有包共享同一套基础设施
+- **一致性**：统一的错误处理、日志格式、进度展示
+- **可维护性**：核心逻辑集中在一处，bug 修复只需改一处
+- **可测试性**：core 包可独立测试，确保基础设施正确
+
 ### 包版本与职责
 
 | 包 | 版本 | 职责 |

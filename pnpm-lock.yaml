@@ -43,6 +43,10 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.26.0(zod@3.25.76)
     devDependencies:
       '@changesets/changelog-github':
         specifier: 'catalog:'

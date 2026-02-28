@@ -158,7 +158,7 @@
         "6. 添加架构说明：为什么整合到 core 包",
         "7. VERIFY: README 清晰易懂，新手能理解架构"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

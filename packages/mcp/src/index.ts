@@ -26,7 +26,7 @@ function createServer(): McpServer {
     { 
       project_dir: z.string().describe("Project directory path (absolute or relative)") 
     },
-    async ({ project_dir }) => {
+    async ({ project_dir }: any) => {
       try {
         const status = getProjectStatus(project_dir);
         
@@ -81,7 +81,7 @@ Phase explanation:
       ulw: z.boolean().optional().describe("Enable ultrawork mode for high precision"),
       max_iterations: z.number().optional().describe("Maximum iterations (default: 1 for single task)")
     },
-    async ({ project_dir, model, ulw, max_iterations }) => {
+    async ({ project_dir, model, ulw, max_iterations }: any) => {
       try {
         const result = runOneTask(project_dir, {
           model,
@@ -120,7 +120,7 @@ Phase explanation:
       extend: z.boolean().optional().describe("Enable extend mode to add new features after completion"),
       agent: z.string().optional().describe("Agent name to use")
     },
-    async ({ project_dir, model, ulw, max_iterations, extend, agent }) => {
+    async ({ project_dir, model, ulw, max_iterations, extend, agent }: any) => {
       try {
         const result = runFullLoop(project_dir, {
           model,
