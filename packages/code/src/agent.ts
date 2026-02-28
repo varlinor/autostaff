@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { detectProjectType, parseTasks } from "@varlinor/autostaff-core";
 import { detectPhase, getAutostaffDir, getTaskPath, type Task } from "@varlinor/autostaff-core";
-import { type CodeOpenCodeClient } from "./client.js";
+import type { OpenCodeClient } from "@varlinor/autostaff-core";
 
 export interface CodeAgentConfig {
   projectDir: string;
@@ -28,7 +28,7 @@ export interface CodeAgentConfig {
 }
 
 export interface CodeAgentDeps {
-  createClient: (projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string, verbose?: boolean, logFile?: string) => CodeOpenCodeClient;
+  createClient: (projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string, verbose?: boolean, logFile?: string) => OpenCodeClient;
   ensureAgentsMd: (projectDir: string) => void;
 }
 

@@ -1,3 +1,39 @@
+/**
+ * @deprecated
+ * 
+ * This file has been deprecated and will be removed in the next major version.
+ * 
+ * All functions have been migrated to `@varlinor/autostaff-core`:
+ * ```typescript
+ * import { 
+ *   detectProjectType, 
+ *   findWorkspaceRoot, 
+ *   getEffectiveDir,
+ *   getWorkspaceFromTask 
+ * } from "@varlinor/autostaff-core";
+ * ```
+ * 
+ * This file is no longer used and should not be imported.
+ */
+
+/**
+ * @deprecated
+ * 
+ * This file has been deprecated and will be removed in the next major version.
+ * 
+ * All functions have been migrated to `@varlinor/autostaff-core`:
+ * ```typescript
+ * import { 
+ *   detectProjectType, 
+ *   findWorkspaceRoot, 
+ *   getEffectiveDir,
+ *   getWorkspaceFromTask 
+ * } from "@varlinor/autostaff-core";
+ * ```
+ * 
+ * This file is no longer used and should not be imported.
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";

@@ -1,11 +1,11 @@
 {
-  "name": "auto-code-mcp",
+  "name": "auto-mcp",
   "version": "0.3.0",
-  "description": "MCP server for auto-code-bot",
+  "description": "MCP server for auto-staff",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "auto-code-mcp": "dist/index.js"
+    "auto-mcp": "dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",

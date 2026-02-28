@@ -3,7 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec, runOneTask, getNextExecutableTask, runFullLoop } from "./lib/project.js";
+import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec, runOneTask, getNextExecutableTask, runFullLoop } from "./lib/project";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";

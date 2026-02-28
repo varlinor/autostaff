@@ -27,7 +27,7 @@ export type {
   IPhaseHandler,
   ITaskValidator,
   IWorkspaceDetector,
-} from "./types.js";
+} from "./types";
 
 // Core modules
 export {
@@ -45,21 +45,24 @@ export {
   getAutostaffDir,
   getTaskPath,
   getProgressPath,
-} from "./progress.js";
+  initProgressFile,
+  generateProgressUpdatePrompt,
+  generateReadProgressPrompt,
+} from "./progress";
 
 export {
   detectProjectType,
   getEffectiveDir,
   getWorkspaceFromTask,
   findWorkspaceRoot,
-} from "./workspace.js";
+} from "./workspace";
 
 export {
   detectPhase,
   hasSpec,
   hasTasks,
   getSpecPath,
-} from "./phase.js";
+} from "./phase";
 // Git operations
 export {
   isGitInitialized,
@@ -70,12 +73,12 @@ export {
   commitTaskCompletion,
   commitProgressUpdate,
   generateGitPrompt,
-} from "./git.js";
+} from "./git";
 
 export type {
   CommitType,
   CommitOptions,
-} from "./git.js";
+} from "./git";
 
 
 // Executor framework
@@ -84,9 +87,28 @@ export {
   DEFAULT_DELAY_MS,
   isAllComplete,
   createProgressSummary,
-} from "./executor.js";
+} from "./executor";
 
 export type {
   BotConfig,
   PhaseHandlers,
-} from "./executor.js";
+} from "./executor";
+
+// UI functions
+export {
+  printSessionHeader,
+  printProgressSummary,
+} from "./progress-ui";
+
+// OpenCode client
+export {
+  DEFAULT_MODEL,
+  SESSION_TIMEOUT_MS,
+  OpenCodeClient,
+  createClient,
+} from "./client";
+
+export type {
+  OpenCodeOptions,
+  ClientResult,
+} from "./client";

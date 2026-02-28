@@ -60,7 +60,7 @@
         "9. VERIFY: npx auto-staff code --help 显示 code 命令参数",
         "10. VERIFY: npx auto-staff text --help 显示 text 命令参数"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-import-fix-1",
@@ -81,7 +81,7 @@
         "9. VERIFY: pnpm build 编译无错误",
         "10. VERIFY: TypeScript 无导入相关警告"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-config-rename-1",

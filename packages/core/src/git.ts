@@ -12,7 +12,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { getProgressPath } from "./progress.js";
+import { getProgressPath } from "./progress";
 
 const DEFAULT_BRANCH = "develop";
 

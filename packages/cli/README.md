@@ -100,11 +100,116 @@ opencode
 
 ```bash
 # 开发模式（推荐）
-npx tsx src/auto-dev.ts ./my-project --ulw
+npx tsx src/index.ts code ./my-project --ulw
 
 # 或构建后运行
-npm run build
-npx auto-staff ./my-project --ulw
+pnpm build
+auto-staff code ./my-project --ulw
+```
+
+---
+
+## CLI 子命令
+
+auto-staff 提供两个子命令，分别用于不同的自动化任务：
+
+| 子命令 | 说明 | 使用场景 |
+|--------|------|----------|
+| `code` | 代码开发 Agent | 开发应用程序、库、包等代码项目 |
+| `text` | 文本内容 Agent | 创作文章、文档、博客等文本内容 |
+
+### code 子命令
+
+代码开发 Agent，处理完整的代码开发工作流：
+
+```bash
+auto-staff code <project-dir> [options]
+```
+
+**工作流程：**
+1. 检测项目阶段（need-spec → need-tasks → execute）
+2. Phase 1: 生成 `docs/app_spec.md` 项目规格
+3. Phase 2: 生成 `.autostaff/task.json` 任务清单 + 项目初始化脚本
+4. Phase 3: 迭代执行任务直到完成
+
+**选项：**
+
+| 选项 | 简写 | 说明 | 默认值 |
+|------|------|------|--------|
+| `--ulw` | - | 启用 ultrawork 模式，高精度执行 | 关闭 |
+| `--model <model>` | `-m` | 指定模型 | minimax(Custom)/MiniMax-M2.5 |
+| `--agent <name>` | `-a` | 指定 agent 名称 | 默认 |
+| `--max-iterations <n>` | - | 最大迭代轮数 | 无限制 |
+| `--spec <file>` | - | 复制规格文件到目标项目 | - |
+| `--desc <text>` | - | 描述要生成规格的项目 | - |
+| `--extend` | `-e` | 追加新功能模式 | 关闭 |
+| `--init-only` | - | 仅生成规格和任务，不执行（适用于 code 命令） | 关闭 |
+| `--verbose` | - | 详细输出（两个命令通用） | 关闭 |
+| `--log-file <path>` | - | 日志文件路径（两个命令通用） | auto-staff.log |
+
+**示例：**
+
+```bash
+# 开发新项目
+auto-staff code ./my-project --ulw
+
+# 指定模型和迭代次数
+auto-staff code ./my-project --ulw -m deepseek/deepseek-chat --max-iterations 5
+
+# 仅生成规格和任务清单（不执行）
+auto-staff code ./my-project --init-only
+
+# 继续之前中断的任务
+auto-staff code ./my-project --ulw
+
+# 通过描述生成规格
+auto-staff code ./my-project --desc "一个 React Todo 应用"
+
+# 使用子命令格式（推荐）
+npx auto-staff code . --ulw --max-iterations 2
+```
+
+### text 子命令
+
+文本内容创作 Agent，处理文本内容创建工作流：
+
+```bash
+auto-staff text <project-dir> [options]
+```
+
+**工作流程：**
+1. 检测项目阶段（need-spec → need-tasks → execute）
+2. Phase 1: 生成 `docs/content_spec.md` 内容规格
+3. Phase 2: 生成 `content_tasks.json` 内容任务清单
+4. Phase 3: 迭代执行内容任务
+
+**选项：**
+
+| 选项 | 简写 | 说明 | 默认值 |
+|------|------|------|--------|
+| `--ulw` | - | 启用 ultrawork 模式 | 关闭 |
+| `--model <model>` | `-m` | 指定模型 | minimax(Custom)/MiniMax-M2.5 |
+| `--agent <name>` | `-a` | 指定 agent 名称 | 默认 |
+| `--max-iterations <n>` | - | 最大迭代轮数 | 无限制 |
+| `--extend` | `-e` | 追加新内容模式 | 关闭 |
+| `--init-only` | - | 仅生成规格和任务，不执行 | 关闭 |
+| `--verbose` | - | 详细输出（两个命令通用） | 关闭 |
+| `--log-file <path>` | - | 日志文件路径（两个命令通用） | auto-staff.log |
+
+**示例：**
+
+```bash
+# 创建文本内容项目
+auto-staff text ./my-blog --ulw
+
+# 指定模型
+auto-staff text ./my-blog -m openai/gpt-4o
+
+# 继续之前的工作
+auto-staff text ./my-blog --ulw
+
+# 使用子命令格式（推荐）
+npx auto-staff text ./content --model deepseek/deepseek-chat
 ```
 
 ---
@@ -134,26 +239,26 @@ Phase 1: 生成 app_spec.md
   → 使用 app-spec-generator skill
 
 Phase 2: 生成 task.json
-  → auto-staff <dir> --init-only
+  → auto-staff code <dir> --init-only
 
 Phase 3: 审核 task.json（推荐）
   → 使用 task-auditor skill
 
 Phase 4: 执行任务
-  → auto-staff <dir> --ulw
+  → auto-staff code <dir> --ulw
 ```
 
 ### 模型示例
 
 ```bash
 # MiniMax（默认）
-npx tsx src/auto-dev.ts ./my-project --ulw
+auto-staff code ./my-project --ulw
 
 # DeepSeek
-npx tsx src/auto-dev.ts ./my-project --ulw -m deepseek/deepseek-chat
+auto-staff code ./my-project --ulw -m deepseek/deepseek-chat
 
 # OpenAI
-npx tsx src/auto-dev.ts ./my-project --ulw -m openai/gpt-4o
+auto-staff code ./my-project --ulw -m openai/gpt-4o
 ```
 
 ---
@@ -164,10 +269,10 @@ npx tsx src/auto-dev.ts ./my-project --ulw -m openai/gpt-4o
 
 ```bash
 # 最简用法
-npx tsx src/auto-dev.ts ./my-project --ulw
+auto-staff code ./my-project --ulw
 
 # 指定模型
-npx tsx src/auto-dev.ts ./my-project --ulw -m openai/gpt-4o
+auto-staff code ./my-project --ulw -m openai/gpt-4o
 ```
 
 **自动检测**：
@@ -179,7 +284,7 @@ npx tsx src/auto-dev.ts ./my-project --ulw -m openai/gpt-4o
 
 ```bash
 # 直接运行，自动检测断点
-npx tsx src/auto-dev.ts ./my-project --ulw
+auto-staff code ./my-project --ulw
 ```
 
 **恢复逻辑**：
@@ -190,12 +295,12 @@ npx tsx src/auto-dev.ts ./my-project --ulw
 
 ```bash
 # 步骤 1: 仅生成 app_spec.md 和 task.json，不执行
-npx tsx src/auto-dev.ts ./my-project --init-only
+auto-staff code ./my-project --init-only
 
 # 步骤 2: 审核 task.json（使用 task-auditor skill）
 
 # 步骤 3: 确认无误后执行任务
-npx tsx src/auto-dev.ts ./my-project --ulw
+auto-staff code ./my-project --ulw
 ```
 
 **使用场景**：
@@ -206,26 +311,26 @@ npx tsx src/auto-dev.ts ./my-project --ulw
 
 ```bash
 # 方式 A：--extend 模式
-npx tsx src/auto-dev.ts ./my-project --extend --ulw
+auto-staff code ./my-project --extend --ulw
 
 # 方式 B：手动编辑 task.json 后继续
 # 1. 编辑 task.json 添加新任务（passes:false）
 # 2. 运行
-npx tsx src/auto-dev.ts ./my-project --ulw
+auto-staff code ./my-project --ulw
 ```
 
-### 场景 4：限制迭代轮数（测试用）
+### 场景 5：限制迭代轮数（测试用）
 
 ```bash
 # 只跑 3 轮
-npx tsx src/auto-dev.ts ./my-project --ulw --max-iterations 3
+auto-staff code ./my-project --ulw --max-iterations 3
 ```
 
-### 场景 5：自定义模型
+### 场景 6：自定义模型
 
 ```bash
 # 使用特定模型
-npx tsx src/auto-dev.ts ./my-project --ulw -m deepseek/deepseek-chat
+auto-staff code ./my-project --ulw -m deepseek/deepseek-chat
 ```
 
 ---

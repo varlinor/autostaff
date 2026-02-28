@@ -11,13 +11,13 @@ import type {
   ITaskExecutor,
   Phase,
   Task
-} from "./types.js";
+} from "./types";
 import { 
   getNextExecutableTask,
   getExecutableTasks,
   countPassingFeatures 
-} from "./progress.js";
-import { detectPhase } from "./phase.js";
+} from "./progress";
+import { detectPhase } from "./phase";
 
 export { 
   ExecutorOptions, 
@@ -93,7 +93,7 @@ export function createProgressSummary(projectDir: string): {
   };
 }
 
-export * from "./types.js";
-export * from "./progress.js";
-export * from "./workspace.js";
-export * from "./phase.js";
+export * from "./types";
+export * from "./progress";
+export * from "./workspace";
+export * from "./phase";

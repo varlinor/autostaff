@@ -1,4 +1,4 @@
-# auto-code-bot Progress
+#PB|# auto-staff Progress
 
 ## 2026-02-18
 
@@ -73,4 +73,28 @@
 - Test verification: pnpm test passes (54 tests)
 - Changesets config: fixed array with [auto-staff, auto-code, auto-text] for same version release
 - Changesets config: updateInternalDependents: always for core dependency updates
-- 2/4 tasks complete
+#ZY|- 2/4 tasks complete
+
+---
+
+## 2026-02-28 (continued)
+
+### Completed Tasks
+- task-cli-commands-1: Update CLI subcommand documentation for code and text commands ✅
+
+### In Progress
+- (none)
+
+### Pending
+- (see .autostaff/task.json)
+
+### Notes
+- Updated CLI to use proper subcommands structure (code, text)
+- Updated packages/cli/README.md with detailed documentation
+- Added examples: npx auto-staff code . --ulw --max-iterations 2
+- Added examples: npx auto-staff text ./content --model deepseek/deepseek-chat
+- Updated --init-only, --verbose, --log-file parameter descriptions
+- VERIFIED: auto-staff --help shows code and text subcommands
+- VERIFIED: auto-staff code --help shows code command parameters
+- VERIFIED: auto-staff text --help shows text command parameters
+- Build passes, no TypeScript errors

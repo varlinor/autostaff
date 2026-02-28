@@ -1,10 +1,12 @@
 /**
  * CLI-specific UI functions for progress display
- * These are kept in CLI as they're presentation-layer concerns
+ * 
+ * These functions provide visual feedback for session execution
+ * and task progress tracking.
  */
 
 import chalk from "chalk";
-import { countPassingFeatures, getFeaturesByCategory } from "@varlinor/autostaff-core";
+import { countPassingFeatures, getFeaturesByCategory } from "./progress";
 
 /**
  * Print session header with styling

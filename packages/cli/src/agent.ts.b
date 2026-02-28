@@ -1,5 +1,5 @@
 import path from "node:path";
-import { createClient, DEFAULT_MODEL } from "./client.js";
+import { createClient, DEFAULT_MODEL } from "@varlinor/autostaff-core";
 import {
   countPassingFeatures,
   getNextExecutableTask,
@@ -8,7 +8,7 @@ import {
 import {
   printSessionHeader,
   printProgressSummary
-} from "./progress-ui.js";
+} from "@varlinor/autostaff-core";
 import { ensureAgentsMd } from "./prompts.js";
 import {
   detectProjectType,

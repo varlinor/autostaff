@@ -9,5 +9,4 @@
  * ```
  */
 
-export { runCodeAgent, type CodeAgentConfig, type CodeAgentDeps } from "./agent.js";
-export { createCodeClient, type CodeOpenCodeClient } from "./client.js";
+export { runCodeAgent, type CodeAgentConfig, type CodeAgentDeps } from "./agent";

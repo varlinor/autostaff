@@ -4,9 +4,9 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import type { ProjectType } from "./types.js";
+import type { ProjectType } from "./types";
 
-export { ProjectType } from "./types.js";
+export { ProjectType } from "./types";
 
 const MONOREPO_MARKERS = [
   "pnpm-workspace.yaml",

@@ -4,8 +4,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import type { Phase } from "./types.js";
-import { getTaskPath } from "./progress.js";
+import type { Phase } from "./types";
+import { getTaskPath } from "./progress";
 
 const SPEC_DIR = "docs";
 const SPEC_FILE = "app_spec.md";
