@@ -69,8 +69,8 @@ packages/
 ├── core/           (@varlinor/autostaff-core)     ← 核心基础设施
 ├── code/           (auto-code)                   → 依赖 core
 ├── text/           (auto-text)                   → 依赖 core  
-├── cli/            (auto-bot)                    → 依赖 core + code + text
-└── mcp/            (auto-code-mcp)              → 依赖 core
+├── cli/            (auto-staff)                  → 依赖 core + code + text
+└── mcp/            (auto-mcp)                    → 依赖 core
 ```
 
 ### 包职责
@@ -80,8 +80,8 @@ packages/
 | **core** | task.json 解析、阶段检测、progress.txt 管理、git 提交、workspace 检测 |
 | **code** | 代码开发 agent，提供 runCodeAgent() |
 | **text** | 文本内容 agent，提供 runTextBot() |
-| **cli** | 主入口，根据参数加载 code/text agent |
-| **mcp** | MCP 协议服务器，供 Claude Desktop/Cursor 集成 |
+| **cli** (auto-staff) | 主入口 CLI，支持 code/text 子命令 |
+| **mcp** (auto-mcp) | MCP 协议服务器，供 Claude Desktop/Cursor 集成 |
 
 ---
 
@@ -111,10 +111,10 @@ auto-staff/
 │   │   ├── package.json       # name: auto-text
 │   │   └── src/
 │   ├── cli/                    # CLI 主入口
-│   │   ├── package.json       # name: auto-bot
+│   │   ├── package.json       # name: auto-staff
 │   │   └── src/
 │   └── mcp/                    # MCP 服务器
-│       ├── package.json       # name: auto-code-mcp
+│       ├── package.json       # name: auto-mcp
 │       └── src/
 ├── skills/                     # Agent skills
 └── test/                      # 测试用例
@@ -202,10 +202,7 @@ npx tsx src/index.ts "D:\你的项目路径" --ulw --max-iterations 2
 | `--desc` | - | 描述生成规格 | - |
 | `--git-branch` | - | Git 分支 | develop |
 | `--verbose` | - | 详细模式：输出到控制台（默认：输出到日志文件） | 关闭 |
-| `--log-file` | - | 日志文件路径 | auto-staff-detail.log |
-| `--git-branch` | - | Git 分支 | develop |
 | `--silent` | - | 静默模式：opencode 输出写文件 | 关闭 |
-| `--log-file` | - | 日志文件路径 | auto-staff.log |
 ---
 
 ## 工作流指南
