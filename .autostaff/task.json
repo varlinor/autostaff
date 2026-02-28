@@ -49,7 +49,7 @@
         "4. 保留 MCP 配置说明，但标注为「实验性」或「待验证」",
         "5. VERIFY: README 表述清晰，用户能理解当前推荐用法"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-test-1",
