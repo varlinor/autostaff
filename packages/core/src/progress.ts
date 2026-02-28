@@ -4,9 +4,9 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import type { Task } from "./types;
+import type { Task } from "./types.js";
 
-export { Task } from "./types;
+export { Task } from "./types.js";
 
 const AUTOSTAFF_DIR = ".autostaff";
 const TASK_FILE = "task.json";

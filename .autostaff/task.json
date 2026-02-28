@@ -122,7 +122,7 @@
         "8. VERIFY: package.json bin 指向 dist/index.js",
         "9. VERIFY: npx auto-code-bot 显示废弃警告"
       ],
-      true
+      "passes": true
     },
     {
       "id": "task-cleanup-1",
@@ -140,7 +140,7 @@
         "6. VERIFY: git status 只显示必要的修改",
         "7. VERIFY: 工作目录干净，无临时文件"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-readme-update-1",

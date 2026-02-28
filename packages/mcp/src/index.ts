@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp;
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio;
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
 import { z } from "zod";
 import { getProjectStatus, readTaskJson, readProgressNotes, readAppSpec, runOneTask, getNextExecutableTask, runFullLoop } from "./lib/project";
 import { readFileSync } from "fs";
