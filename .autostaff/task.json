@@ -33,7 +33,7 @@
         "5. VERIFY: pnpm changeset 可正常创建变更",
         "6. VERIFY: 配置符合预期（同组包同版本、依赖更新联动）"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "task-readme-1",
