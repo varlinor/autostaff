@@ -20,9 +20,9 @@
 **使用流程**：
 ```
 1. 生成 app_spec.md（使用 app-spec-generator skill）
-2. 生成 task.json（auto-code-bot --init-only）
+2. 生成 task.json（auto-bot code --init-only）
 3. 审核 task.json（使用 task-auditor skill）
-4. 执行任务（auto-code-bot --ulw）
+4. 执行任务（auto-bot code --ulw）
 ```
 
 ---
@@ -62,6 +62,7 @@
 - [x] skills/task-auditor.md
 
 ---
+
 ### v0.3.0 ✅ 已完成
 
 **目标：多应用编排 + 日志与输出控制**
@@ -92,22 +93,125 @@
 - [x] `--log-file <path>` 指定日志文件路径
 - [x] 分离 auto-bot 与 opencode 输出
 - [x] 时间戳日志格式
+
 ---
-### v1.0.0 🔄 规划中
 
-### v1.0.0 🔄 规划中
+### v1.0.0 ✅ 已完成
 
-**目标：完整愿景**
+**目标：架构拆分 + 统一 CLI + 核心基础设施**
 
-**高级特性**：
-- [ ] 并行构建支持
-- [ ] 增量构建（只构建变更部分）
-- [ ] 智能依赖拓扑排序（优化）
+#### 架构拆分
 
-**质量保障**：
-- [ ] 单元测试覆盖
-- [ ] E2E 测试
-- [ ] CI/CD 集成
+**设计理念**：
+- 将通用逻辑抽取到 core 包
+- 各业务包（code, text）依赖 core
+- 实现关注点分离，便于扩展
+
+**已完成**：
+- [x] 创建 `@varlinor/auto-bot-core` 包
+- [x] 抽取 task.json 解析逻辑（parseTasks, topologicalSort）
+- [x] 抽取工作区检测逻辑（detectProjectType, findWorkspaceRoot）
+- [x] 抽取阶段检测逻辑（detectPhase）
+- [x] 抽取 git 操作逻辑（conventionalCommit, initGit）
+- [x] 抽象 Executor 接口，支持任务执行器注入
+
+#### 统一 CLI
+
+**设计理念**：
+- 单一入口，多子命令
+- code/text 作为子命令
+- 包名与命令名一致
+
+**已完成**：
+- [x] CLI 包重命名为 `auto-bot`
+- [x] 创建 `auto-code` 包（代码开发）
+- [x] 创建 `auto-text` 包（文字创作）
+- [x] 实现子命令：`auto-bot code` / `auto-bot text`
+- [x] 向后兼容：直接运行 `auto-bot` 默认执行 code
+
+#### 核心基础设施
+
+**已完成**：
+- [x] task.json 创建、检查、阶段判断
+- [x] progress.txt 初始化、更新
+- [x] 长时间任务执行、状态收集、记录
+- [x] git 提交及 Conventional Commits 格式约束
+- [x] 代码相关 agent 和检查要求
+- [x] 文本相关 agent 和检查要求
+
+---
+
+### v1.1.0 🔄 规划中
+
+**目标：配置提取 + Agent 可替换**
+
+#### 配置提取
+
+**设计理念**：
+- 将代码中的常量提取到配置文件
+- 支持用户自定义配置
+- 参考 opencode 配置实现，全局配置放在 `~/.config/auto-bot/`
+
+**规划中**：
+- [ ] 创建 `~/.config/auto-bot/config.json` 全局配置
+- [ ] 支持项目级配置 `auto-bot.json`（优先级：CLI > 项目 > 全局）
+- [ ] 提取默认模型配置
+- [ ] 提取默认分支配置
+- [ ] 提取超时配置
+- [ ] 提取日志配置
+
+#### Agent 可替换
+
+**设计理念**：
+- 不硬编码执行命令，允许用户替换为其他 agent
+- 例如：将 opencode 替换为 claude-code 来执行
+- 保持接口一致，按需实现具体执行逻辑
+
+**规划中**：
+- [ ] 抽象 Agent 执行器接口（IAgentExecutor）
+- [ ] 默认使用 opencode 执行
+- [ ] 支持配置 claude-code 作为替代
+- [ ] 支持自定义 agent 命令
+- [ ] 传递 workspace、model、参数等配置
+
+#### 配置项设计
+
+```json
+// ~/.config/auto-bot/config.json
+{
+  "agent": {
+    "type": "opencode",  // 或 "claude-code", "custom"
+    "command": "opencode",
+    "args": []
+  },
+  "defaults": {
+    "model": "minimax(Custom)/MiniMax-M2.5",
+    "gitBranch": "develop",
+    "packageManager": "pnpm"
+  },
+  "paths": {
+    "config": "~/.config/auto-bot/",
+    "cache": "~/.cache/auto-bot/"
+  }
+}
+```
+
+---
+
+### v1.2.0 🔄 规划中
+
+**目标：完善 text agent + 扩展性增强**
+
+#### text agent 完善
+
+- [ ] 实现 opencode 集成
+- [ ] 完善文字内容验证器
+- [ ] 支持多种内容格式（博客、文档，营销文案）
+
+#### 扩展性增强
+
+- [ ] 抽象更多 core 接口
+- [ ] 插件化验证器
 
 ---
 
@@ -124,14 +228,50 @@ auto-code-bot/
 │   ├── ROADMAP.md
 │   └── project_status.md
 ├── packages/
-│   ├── cli/                         ✅ (auto-code-bot)
-│   │   ├── package.json            ✅ name: "auto-code-bot"
+│   ├── cli/                         ✅ (auto-bot)
+│   │   ├── package.json            ✅ name: "auto-bot"
 │   │   └── src/
-│   └── mcp/                        ✅ (auto-code-mcp)
+│   │       └── index.ts           ✅ 子命令入口
+│   ├── core/                       ✅ (@varlinor/auto-bot-core)
+│   │   ├── package.json            ✅ name: "@varlinor/auto-bot-core"
+│   │   └── src/
+│   │       ├── index.ts
+│   │       ├── types.ts
+│   │       ├── progress.ts
+│   │       ├── workspace.ts
+│   │       ├── phase.ts
+│   │       ├── git.ts
+│   │       └── executor.ts
+│   ├── code/                       ✅ (auto-code)
+│   │   ├── package.json            ✅ name: "auto-code"
+│   │   └── src/
+│   │       ├── index.ts
+│   │       ├── agent.ts
+│   │       └── client.ts
+│   ├── text/                       ✅ (auto-text)
+│   │   ├── package.json            ✅ name: "auto-text"
+│   │   └── src/
+│   │       ├── index.ts
+│   │       ├── agent.ts
+│   │       └── validator.ts
+│   └── mcp/                       ✅ (auto-code-mcp)
 │       ├── package.json            ✅ name: "auto-code-mcp"
 │       └── src/
 │           └── index.ts            ✅ MCP 入口
 └── skills/                          ✅
     ├── app-spec-generator.md
     └── task-auditor.md
+```
+
+## CLI 使用方式
+
+```bash
+# 代码开发
+auto-bot code ./project --ulw
+
+# 文字创作
+auto-bot text ./content --ulw
+
+# 默认（向后兼容，等同于 code）
+auto-bot ./project --ulw
 ```
