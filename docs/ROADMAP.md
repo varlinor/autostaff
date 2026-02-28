@@ -151,14 +151,15 @@
 - 将代码中的常量提取到配置文件
 - 支持用户自定义配置
 - 参考 opencode 配置实现，全局配置放在 `~/.config/auto-bot/`
+- 保持与现有配置格式兼容
 
 **规划中**：
 - [ ] 创建 `~/.config/auto-bot/config.json` 全局配置
-- [ ] 支持项目级配置 `auto-bot.json`（优先级：CLI > 项目 > 全局）
+- [ ] 支持项目级配置 `auto-code-bot.json`（优先级：CLI > 项目 > 全局）
 - [ ] 提取默认模型配置
 - [ ] 提取默认分支配置
-- [ ] 提取超时配置
 - [ ] 提取日志配置
+- [ ] 提取静默模式配置
 
 #### Agent 可替换
 
@@ -166,6 +167,7 @@
 - 不硬编码执行命令，允许用户替换为其他 agent
 - 例如：将 opencode 替换为 claude-code 来执行
 - 保持接口一致，按需实现具体执行逻辑
+- 参考现有配置格式，使用 executor 对象
 
 **规划中**：
 - [ ] 抽象 Agent 执行器接口（IAgentExecutor）
@@ -177,24 +179,29 @@
 #### 配置项设计
 
 ```json
-// ~/.config/auto-bot/config.json
+// 项目级配置 auto-code-bot.json 或全局配置 ~/.config/auto-bot/config.json
 {
-  "agent": {
-    "type": "opencode",  // 或 "claude-code", "custom"
-    "command": "opencode",
-    "args": []
+  "executor": {
+    "type": "opencode",
+    "command": "pnpm exec opencode",
+    "args": [],
+    "silent": false,
+    "logFile": "auto-code-bot.log"
   },
-  "defaults": {
-    "model": "minimax(Custom)/MiniMax-M2.5",
-    "gitBranch": "develop",
-    "packageManager": "pnpm"
-  },
-  "paths": {
-    "config": "~/.config/auto-bot/",
-    "cache": "~/.cache/auto-bot/"
-  }
+  "model": "minimax(Custom)/MiniMax-M2.5",
+  "packageManager": "npm",
+  "agent": "",
+  "ulw": false,
+  "maxIterations": 0,
+  "gitBranch": "develop"
 }
 ```
+
+**配置优先级**（从高到低）：
+1. CLI 参数（最高优先级）
+2. 项目级配置 `auto-code-bot.json`
+3. 全局配置 `~/.config/auto-bot/config.json`
+4. 代码默认值（最低优先级）
 
 ---
 
