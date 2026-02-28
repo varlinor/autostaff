@@ -4,7 +4,7 @@
 
 ## 架构
 
-MCP 服务器依赖 `@varlinor/auto-bot-core` 核心包，提供以下功能：
+MCP 服务器依赖 `@varlinor/autostaff-core` 核心包，提供以下功能：
 
 - 阶段检测 (need-spec / need-tasks / execute)
 - 任务解析和拓扑排序

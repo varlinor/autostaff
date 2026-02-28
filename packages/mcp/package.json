@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
-    "@varlinor/auto-bot-core": "workspace:*",
+    "@varlinor/autostaff-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

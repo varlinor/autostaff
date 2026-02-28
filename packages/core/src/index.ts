@@ -1,5 +1,5 @@
 /**
- * @varlinor/auto-bot-core
+ * @varlinor/autostaff-core
  * 
  * Core framework for building autonomous automation bots.
  * Provides task management, workspace detection, phase detection,
@@ -11,7 +11,7 @@
  *   detectPhase, 
  *   getNextExecutableTask, 
  *   topologicalSort 
- * } from '@varlinor/auto-bot-core';
+ * } from '@varlinor/autostaff-core';
  * ```
  */
 
@@ -42,6 +42,9 @@ export {
   getNextExecutableTask,
   readProgressNotes,
   writeProgressNotes,
+  getAutostaffDir,
+  getTaskPath,
+  getProgressPath,
 } from "./progress.js";
 
 export {
@@ -56,7 +59,6 @@ export {
   hasSpec,
   hasTasks,
   getSpecPath,
-  getTaskPath,
 } from "./phase.js";
 // Git operations
 export {

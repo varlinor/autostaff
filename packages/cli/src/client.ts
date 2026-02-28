@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import path from "node:path";
 import chalk from "chalk";
-import { getEffectiveDir } from "./workspace.js";
+import { getEffectiveDir } from "@varlinor/autostaff-core";
 
 export const DEFAULT_MODEL = "minimax(Custom)/MiniMax-M2.5";
 const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
@@ -14,7 +14,7 @@ export interface OpenCodeOptions {
   model?: string;
   agent?: string;
   ulw?: boolean;
-  silent?: boolean;
+  verbose?: boolean;
   logFile?: string;
 }
 
@@ -27,29 +27,35 @@ export class OpenCodeClient extends EventEmitter {
   constructor(options: OpenCodeOptions) {
     super();
     this.options = options;
-    if (this.options.silent) {
-      this.logFilePath = this.options.logFile 
-        ? path.resolve(this.options.logFile) 
-        : path.join(this.options.cwd, "auto-code-bot.log");
+    // Default: output to log file only (verbose=false/undefined)
+    // If verbose=true: print to console
+    if (!this.options.verbose) {
+      if (this.options.logFile) {
+        // 判断是否为绝对路径
+        if (path.isAbsolute(this.options.logFile)) {
+          this.logFilePath = this.options.logFile;
+        } else {
+          // 相对路径基于 projectDir (cwd) 计算
+          this.logFilePath = path.join(this.options.cwd, this.options.logFile);
+        }
+      } else {
+        // 默认日志文件名
+        this.logFilePath = path.join(this.options.cwd, "auto-code-bot-detail.log");
+      }
+      // 确保日志文件目录存在
+      const logDir = path.dirname(this.logFilePath);
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
     }
   }
 
   private writeToLog(text: string): void {
-    if (this.options.silent) {
+    // Default: output to log file only (verbose=false/undefined)
+    // If verbose=true: already writes to console separately
+    if (!this.options.verbose && this.logFilePath) {
       const timestamp = new Date().toISOString();
       fs.appendFileSync(this.logFilePath, `[${timestamp}] ${text}\n`);
-    }
-  }
-
-  private writeToOutput(text: string, isError = false): void {
-    this.outputBuffer += text;
-    this.writeToLog(text);
-    if (!this.options.silent) {
-      if (isError) {
-        process.stderr.write(text);
-      } else {
-        process.stdout.write(text);
-      }
     }
   }
 
@@ -70,12 +76,18 @@ export class OpenCodeClient extends EventEmitter {
 
       const log = (text: string) => {
         this.writeToLog(text);
-        console.log(text);
+        // Print to console only if verbose=true
+        if (this.options.verbose) {
+          console.log(text);
+        }
       };
 
       const logError = (text: string) => {
         this.writeToLog(text);
-        console.error(text);
+        // Print to console only if verbose=true
+        if (this.options.verbose) {
+          console.error(text);
+        }
       };
 
       log(`\n[auto-code-bot] Executing: ${cmdLine.substring(0, 120)}...${workspaceInfo}`);
@@ -107,7 +119,8 @@ export class OpenCodeClient extends EventEmitter {
         const text = data.toString();
         this.outputBuffer += text;
         this.writeToLog(text);
-        if (!this.options.silent) {
+        // Print to console only if verbose=true
+        if (this.options.verbose) {
           process.stdout.write(text);
         }
       });
@@ -116,7 +129,8 @@ export class OpenCodeClient extends EventEmitter {
         const text = data.toString();
         this.writeToLog(text);
         if (!text.includes("Debugger") && !text.includes("ExperimentalWarning")) {
-          if (!this.options.silent) {
+          // Print to console only if verbose=true
+          if (this.options.verbose) {
             process.stderr.write(text);
           }
         }
@@ -171,14 +185,14 @@ export class OpenCodeClient extends EventEmitter {
   }
 }
 
-export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string, silent?: boolean, logFile?: string): OpenCodeClient {
+export function createClient(projectDir: string, model?: string, agent?: string, ulw?: boolean, workspace?: string, verbose?: boolean, logFile?: string): OpenCodeClient {
   return new OpenCodeClient({
     cwd: path.resolve(projectDir),
     workspace,
     model,
     agent,
     ulw,
-    silent,
+    verbose,
     logFile,
   });
 }

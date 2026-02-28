@@ -12,7 +12,7 @@ import {
   commitProgressUpdate,
   generateGitPrompt,
   type CommitType,
-} from "@varlinor/auto-bot-core";
+} from "@varlinor/autostaff-core";
 
 describe("git.ts", () => {
   // Use OS temp directory to avoid parent git repo interference
@@ -163,7 +163,11 @@ describe("git.ts", () => {
   describe("commitProgressUpdate", () => {
     it("should commit progress.txt with chore type", async () => {
       await initGit(testDir);
-      fs.writeFileSync(path.join(testDir, "progress.txt"), "# Progress\n");
+      
+      // Create .autostaff directory and progress.txt
+      const autostaffDir = path.join(testDir, ".autostaff");
+      fs.mkdirSync(autostaffDir, { recursive: true });
+      fs.writeFileSync(path.join(autostaffDir, "progress.txt"), "# Progress\n");
       
       await commitProgressUpdate(testDir, "1");
       

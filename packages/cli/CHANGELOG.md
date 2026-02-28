@@ -1,5 +1,11 @@
 # auto-code-bot CHANGELOG
 
+## 0.3.1
+
+### Patch Changes
+
+- fix: modify opencode session output logic
+
 ## 0.3.0
 
 ### Minor Changes

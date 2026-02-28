@@ -20,7 +20,7 @@ import {
   topologicalSort,
   type Task,
   type Phase,
-} from "@varlinor/auto-bot-core";
+} from "@varlinor/autostaff-core";
 
 // Re-export types from core for backward compatibility
 export type { Task, Phase };

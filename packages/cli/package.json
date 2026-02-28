@@ -1,23 +1,26 @@
 {
-  "name": "auto-code-bot",
-  "version": "0.3.0",
-  "description": "Fully autonomous coding system with long-running agent harness",
+  "name": "auto-bot",
+  "version": "0.4.0",
+  "description": "Unified CLI for autonomous automation - code, text, and more",
   "type": "module",
-  "main": "dist/auto-dev.js",
+  "main": "dist/index.js",
   "bin": {
-    "auto-code-bot": "dist/auto-dev.js"
+    "auto-bot": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/auto-dev.ts",
-    "start": "node dist/auto-dev.js",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "chalk": "catalog:",
     "commander": "catalog:",
-    "ora": "catalog:"
+    "ora": "catalog:",
+    "@varlinor/autostaff-core": "workspace:*",
+    "auto-code": "workspace:*",
+    "auto-text": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -26,15 +29,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/varlinor/code-bot"
+    "url": "https://github.com/varlinor/autostaff"
   },
   "keywords": [
     "ai",
     "agent",
     "autonomous",
     "coding",
-    "opencode",
-    "developer-tools"
+    "writing",
+    "opencode"
   ],
   "author": "varlinor",
   "license": "MIT"

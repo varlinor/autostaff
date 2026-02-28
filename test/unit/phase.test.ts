@@ -8,16 +8,17 @@ import {
   getSpecPath,
   getTaskPath,
   type Phase,
-} from "@varlinor/auto-bot-core";
+} from "@varlinor/autostaff-core";
 
 describe("phase.ts", () => {
   const testDir = path.join(process.cwd(), "test", "temp-phase");
+  const autostaffDir = path.join(testDir, ".autostaff");
 
   beforeEach(() => {
     if (fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true, force: true });
     }
-    fs.mkdirSync(testDir, { recursive: true });
+    fs.mkdirSync(autostaffDir, { recursive: true });
   });
 
   afterEach(() => {
@@ -41,7 +42,7 @@ describe("phase.ts", () => {
     });
 
     it("should return 'execute' when task.json exists (even without spec)", () => {
-      fs.writeFileSync(path.join(testDir, "task.json"), JSON.stringify({ tasks: [] }));
+      fs.writeFileSync(path.join(autostaffDir, "task.json"), JSON.stringify({ tasks: [] }));
       
       const phase = detectPhase(testDir);
       expect(phase).toBe("execute");
@@ -50,7 +51,7 @@ describe("phase.ts", () => {
     it("should return 'execute' when both spec and task.json exist", () => {
       fs.mkdirSync(path.join(testDir, "docs"), { recursive: true });
       fs.writeFileSync(path.join(testDir, "docs", "app_spec.md"), "# App Spec");
-      fs.writeFileSync(path.join(testDir, "task.json"), JSON.stringify({ tasks: [] }));
+      fs.writeFileSync(path.join(autostaffDir, "task.json"), JSON.stringify({ tasks: [] }));
       
       const phase = detectPhase(testDir);
       expect(phase).toBe("execute");
@@ -97,7 +98,7 @@ describe("phase.ts", () => {
     });
 
     it("should return true when task.json exists", () => {
-      fs.writeFileSync(path.join(testDir, "task.json"), JSON.stringify({ tasks: [] }));
+      fs.writeFileSync(path.join(autostaffDir, "task.json"), JSON.stringify({ tasks: [] }));
       
       expect(hasTasks(testDir)).toBe(true);
     });
@@ -130,9 +131,9 @@ describe("phase.ts", () => {
   });
 
   describe("getTaskPath", () => {
-    it("should return task.json path", () => {
+    it("should return task.json path in .autostaff", () => {
       const taskPath = getTaskPath(testDir);
-      expect(taskPath).toBe(path.join(testDir, "task.json"));
+      expect(taskPath).toBe(path.join(autostaffDir, "task.json"));
     });
   });
 

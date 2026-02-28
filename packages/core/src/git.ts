@@ -12,6 +12,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { getProgressPath } from "./progress.js";
 
 const DEFAULT_BRANCH = "develop";
 
@@ -175,7 +176,7 @@ export async function commitProgressUpdate(
     projectDir,
     type: "chore",
     message: `Update progress: marked task-${taskId} as complete`,
-    files: ["progress.txt"],
+    files: [".autostaff/progress.txt"],
   });
 }
 

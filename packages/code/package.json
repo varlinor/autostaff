@@ -1,10 +1,9 @@
 {
-  "name": "@varlinor/autostaff-core",
+  "name": "auto-code",
   "version": "0.1.0",
-  "description": "Core framework for autonomous automation bots",
+  "description": "Code development agent for auto-bot framework",
   "type": "module",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -18,7 +17,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "chalk": "catalog:"
+    "chalk": "catalog:",
+    "@varlinor/autostaff-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -33,7 +33,7 @@
     "ai",
     "agent",
     "autonomous",
-    "automation",
+    "coding",
     "opencode"
   ],
   "author": "varlinor",

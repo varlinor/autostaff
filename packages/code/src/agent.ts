@@ -9,7 +9,7 @@
 import chalk from "chalk";
 import fs from "node:fs";
 import path from "node:path";
-import { detectProjectType } from "@varlinor/autostaff-core";
+import { detectProjectType, parseTasks } from "@varlinor/autostaff-core";
 import { detectPhase, getAutostaffDir, getTaskPath, type Task } from "@varlinor/autostaff-core";
 import { type CodeOpenCodeClient } from "./client.js";
 
@@ -48,12 +48,14 @@ export async function runCodeAgent(
   fs.mkdirSync(projectDir, { recursive: true });
 
   console.log("\n" + chalk.bold("═".repeat(70)));
-  console.log(chalk.bold("  AUTO-CODE: Autonomous Code Development"));
+  console.log(chalk.bold("  AUTO-STAFF: Autonomous Code Generator"));
   console.log(chalk.bold("═".repeat(70)));
   console.log(`\n  Project: ${chalk.cyan(projectDir)}`);
   console.log(`  Model:   ${chalk.cyan(model || "minimax(Custom)/MiniMax-M2.5")}`);
   if (ulw) console.log(`  ULW:     ${chalk.yellow("enabled")}`);
   console.log(`  Limit:   ${maxIterations ? chalk.cyan(String(maxIterations)) : chalk.dim("unlimited")}`);
+
+  let phase = detectPhase(projectDir);
 
   // Detect project type
   detectProjectType(projectDir);
@@ -69,7 +71,6 @@ export async function runCodeAgent(
     }
   }
 
-  let phase = detectPhase(projectDir);
   let iteration = 0;
 
   // Phase 1: Generate app_spec.md
@@ -93,12 +94,14 @@ export async function runCodeAgent(
       console.error(chalk.red("\n  Session error during spec generation"));
     }
 
-    phase = detectPhase(projectDir);
-    if (phase === "need-spec") {
+    const newPhase = detectPhase(projectDir);
+    if (newPhase === "need-spec") {
       console.log(chalk.yellow("\n  ⚠ app_spec.md was not created. Re-run to retry."));
       console.log(chalk.yellow("  The agent may need more time or clarification.\n"));
       return;
     }
+    
+    phase = newPhase;
 
     await sleep(DELAY_MS);
   }
@@ -166,12 +169,14 @@ You are in: ${projectDir}
       console.error(chalk.red("\n  Session error during initialization"));
     }
 
-    phase = detectPhase(projectDir);
-    if (phase === "need-tasks") {
+    const newPhase = detectPhase(projectDir);
+    if (newPhase === "need-tasks") {
       console.log(chalk.yellow("\n  ⚠ task.json was not created. Re-run to retry."));
       console.log(chalk.yellow("  The agent may need more time or clarification.\n"));
       return;
     }
+    
+    phase = newPhase;
 
     await sleep(DELAY_MS);
   }
@@ -213,6 +218,21 @@ You are in: ${projectDir}
     }
 
     const tasks = loadTasks(projectDir);
+    
+    // CRITICAL: If task.json failed to load, stop immediately
+    if (tasks.length === 0) {
+      const taskPath = getTaskPath(projectDir);
+      if (fs.existsSync(taskPath)) {
+        // File exists but failed to parse - error already printed by loadTasks()
+        console.error(chalk.red("  Aborting due to task.json parse error.\n"));
+        process.exit(1);
+      } else {
+        // File doesn't exist - shouldn't happen in execute phase
+        console.log(chalk.green("\n  ✓ No tasks defined. Project initialization complete!"));
+        break;
+      }
+    }
+    
     const pendingTasks = tasks.filter(t => !t.passes);
 
     if (pendingTasks.length === 0) {
@@ -264,17 +284,18 @@ ${task.workspace ? `Workspace: ${task.workspace}` : ""}
   }
 }
 
+
 function loadTasks(projectDir: string): Task[] {
   const taskPath = getTaskPath(projectDir);
   try {
     const content = fs.readFileSync(taskPath, "utf-8");
-    // Handle JSONC (JSON with comments)
-    const jsonContent = content
-      .replace(/\/\/.*$/gm, "")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    const data = JSON.parse(jsonContent);
-    return data.tasks || [];
-  } catch {
+    const tasks = parseTasks(content);
+    return tasks;
+  } catch (error: any) {
+    console.error(chalk.red("\n  ✗ Failed to load task.json:"));
+    console.error(chalk.red(`    File: ${taskPath}`));
+    console.error(chalk.red(`    Error: ${error.message}`));
+    console.error(chalk.yellow("\n  Please fix the JSON syntax error and try again.\n"));
     return [];
   }
 }

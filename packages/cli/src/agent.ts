@@ -4,7 +4,7 @@ import {
   countPassingFeatures,
   getNextExecutableTask,
   getExecutableTasks
-} from "@varlinor/auto-bot-core";
+} from "@varlinor/autostaff-core";
 import {
   printSessionHeader,
   printProgressSummary
@@ -14,7 +14,7 @@ import {
   detectProjectType,
   getWorkspaceFromTask,
   findWorkspaceRoot
-} from "@varlinor/auto-bot-core";
+} from "@varlinor/autostaff-core";
 import chalk from "chalk";
 
 const DELAY_MS = 3000;

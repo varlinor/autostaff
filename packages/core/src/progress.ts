@@ -8,14 +8,67 @@ import type { Task } from "./types.js";
 
 export { Task } from "./types.js";
 
+const AUTOSTAFF_DIR = ".autostaff";
 const TASK_FILE = "task.json";
 const PROGRESS_FILE = "progress.txt";
 
 /**
- * Strip JSONC comments from content
+ * Get the .autostaff directory path
+ */
+export function getAutostaffDir(projectDir: string): string {
+  return path.join(projectDir, AUTOSTAFF_DIR);
+}
+
+/**
+ * Get task.json path in .autostaff directory
+ */
+export function getTaskPath(projectDir: string): string {
+  return path.join(projectDir, AUTOSTAFF_DIR, TASK_FILE);
+}
+
+/**
+ * Get progress.txt path in .autostaff directory
+ */
+export function getProgressPath(projectDir: string): string {
+  return path.join(projectDir, AUTOSTAFF_DIR, PROGRESS_FILE);
+}
+
+/**
+ * Strip JSONC comments from content while preserving URLs and strings
+ * 
+ * Uses character-by-character parsing to correctly identify comments
+ * that appear outside of string literals.
  */
 export function stripJsoncComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  const lines = text.split('\n');
+  const result: string[] = [];
+  let inString = false;
+  
+  for (let line of lines) {
+    let stripped = '';
+    
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      const prev = i > 0 ? line[i - 1] : '';
+      
+      // Toggle string state on unescaped quotes
+      if (c === '"' && prev !== '\\') {
+        inString = !inString;
+      }
+      
+      // Check for comment start (only when not in string)
+      if (!inString && c === '/' && i + 1 < line.length && line[i + 1] === '/') {
+        // Rest of line is comment, skip it
+        break;
+      }
+      
+      stripped += c;
+    }
+    
+    result.push(stripped);
+  }
+  
+  return result.join('\n');
 }
 
 /**
@@ -38,7 +91,7 @@ export function parseTasks(content: string): Task[] {
  * Count passing features in project
  */
 export function countPassingFeatures(projectDir: string): { passing: number; total: number } {
-  const taskFile = path.join(projectDir, TASK_FILE);
+  const taskFile = getTaskPath(projectDir);
 
   if (!fs.existsSync(taskFile)) {
     return { passing: 0, total: 0 };
@@ -60,7 +113,7 @@ export function countPassingFeatures(projectDir: string): { passing: number; tot
  * Get features grouped by category
  */
 export function getFeaturesByCategory(projectDir: string): Map<string, { passing: number; total: number }> {
-  const taskFile = path.join(projectDir, TASK_FILE);
+  const taskFile = getTaskPath(projectDir);
   const result = new Map<string, { passing: number; total: number }>();
 
   if (!fs.existsSync(taskFile)) {
@@ -89,7 +142,7 @@ export function getFeaturesByCategory(projectDir: string): Map<string, { passing
  * Check if first run (no task.json)
  */
 export function isFirstRun(projectDir: string): boolean {
-  return !fs.existsSync(path.join(projectDir, TASK_FILE));
+  return !fs.existsSync(getTaskPath(projectDir));
 }
 
 /**
@@ -163,7 +216,7 @@ export function topologicalSort(tasks: Task[]): Task[] {
  * Get executable tasks (tasks where all dependencies are satisfied)
  */
 export function getExecutableTasks(projectDir: string): Task[] {
-  const taskFile = path.join(projectDir, TASK_FILE);
+  const taskFile = getTaskPath(projectDir);
 
   if (!fs.existsSync(taskFile)) {
     return [];
@@ -214,7 +267,7 @@ export function getNextExecutableTask(projectDir: string): Task | null {
  * Read progress notes
  */
 export function readProgressNotes(projectDir: string): string | null {
-  const progressFile = path.join(projectDir, PROGRESS_FILE);
+  const progressFile = getProgressPath(projectDir);
   if (fs.existsSync(progressFile)) {
     return fs.readFileSync(progressFile, "utf-8");
   }
@@ -225,6 +278,6 @@ export function readProgressNotes(projectDir: string): string | null {
  * Write progress notes
  */
 export function writeProgressNotes(projectDir: string, content: string): void {
-  const progressFile = path.join(projectDir, PROGRESS_FILE);
+  const progressFile = getProgressPath(projectDir);
   fs.writeFileSync(progressFile, content, "utf-8");
 }

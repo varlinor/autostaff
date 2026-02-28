@@ -55,7 +55,7 @@ Step 2: 用 auto-code-bot 执行任务直到完成
 
 ```
 packages/
-├── core/           (@varlinor/auto-bot-core)     ← 核心基础设施
+├── core/           (@varlinor/autostaff-core)     ← 核心基础设施
 ├── code/           (auto-code)                   → 依赖 core
 ├── text/           (auto-text)                   → 依赖 core  
 ├── cli/            (auto-bot)                    → 依赖 core + code + text
@@ -93,7 +93,7 @@ auto-code-bot/
 ├── task.json                   # 任务清单（根目录）
 ├── packages/
 │   ├── core/                   # 核心包 - 任务管理、阶段检测、git提交
-│   │   ├── package.json       # name: @varlinor/auto-bot-core
+│   │   ├── package.json       # name: @varlinor/autostaff-core
 │   │   └── src/
 │   ├── code/                   # 代码开发 Agent
 │   │   ├── package.json       # name: auto-code

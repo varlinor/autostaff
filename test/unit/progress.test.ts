@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { topologicalSort, getExecutableTasks, getNextExecutableTask, type Task } from "@varlinor/auto-bot-core";
+import { topologicalSort, getExecutableTasks, getNextExecutableTask, type Task } from "@varlinor/autostaff-core";
 
 describe("progress.ts", () => {
   const testDir = path.join(process.cwd(), "test", "temp-progress");
+  const autostaffDir = path.join(testDir, ".autostaff");
 
   beforeEach(() => {
-    fs.mkdirSync(testDir, { recursive: true });
+    fs.mkdirSync(autostaffDir, { recursive: true });
   });
 
   describe("topologicalSort", () => {
@@ -64,7 +65,7 @@ describe("progress.ts", () => {
 
   describe("getExecutableTasks", () => {
     it("should return all tasks with no dependencies as executable", () => {
-      const taskFile = path.join(testDir, "task.json");
+      const taskFile = path.join(autostaffDir, "task.json");
       fs.writeFileSync(taskFile, JSON.stringify({
         tasks: [
           { id: 1, category: "test", description: "Task 1", steps: [], passes: false },
@@ -78,7 +79,7 @@ describe("progress.ts", () => {
     });
 
     it("should only return tasks with satisfied dependencies", () => {
-      const taskFile = path.join(testDir, "task.json");
+      const taskFile = path.join(autostaffDir, "task.json");
       fs.writeFileSync(taskFile, JSON.stringify({
         tasks: [
           { id: 1, category: "test", description: "Task 1", steps: [], passes: true },
@@ -94,7 +95,7 @@ describe("progress.ts", () => {
     });
 
     it("should return empty array when all tasks pass", () => {
-      const taskFile = path.join(testDir, "task.json");
+      const taskFile = path.join(autostaffDir, "task.json");
       fs.writeFileSync(taskFile, JSON.stringify({
         tasks: [
           { id: 1, category: "test", description: "Task 1", steps: [], passes: true },
@@ -109,7 +110,7 @@ describe("progress.ts", () => {
 
   describe("getNextExecutableTask", () => {
     it("should return the first executable task", () => {
-      const taskFile = path.join(testDir, "task.json");
+      const taskFile = path.join(autostaffDir, "task.json");
       fs.writeFileSync(taskFile, JSON.stringify({
         tasks: [
           { id: 1, category: "test", description: "Task 1", steps: [], passes: false },
@@ -124,7 +125,7 @@ describe("progress.ts", () => {
     });
 
     it("should return null when no executable tasks", () => {
-      const taskFile = path.join(testDir, "task.json");
+      const taskFile = path.join(autostaffDir, "task.json");
       fs.writeFileSync(taskFile, JSON.stringify({
         tasks: [
           { id: 1, category: "test", description: "Task 1", steps: [], passes: true },

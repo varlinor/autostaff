@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Phase } from "./types.js";
+import { getTaskPath } from "./progress.js";
 
 const SPEC_DIR = "docs";
 const SPEC_FILE = "app_spec.md";
@@ -21,7 +22,7 @@ export function detectPhase(dir: string): Phase {
   const hasSpec = 
     fs.existsSync(path.join(dir, SPEC_DIR, SPEC_FILE)) || 
     fs.existsSync(path.join(dir, "app_spec.txt"));
-  const hasTasks = fs.existsSync(path.join(dir, "task.json"));
+  const hasTasks = fs.existsSync(getTaskPath(dir));
 
   if (!hasSpec && hasTasks) return "execute";
   if (!hasSpec) return "need-spec";
@@ -43,7 +44,7 @@ export function hasSpec(dir: string): boolean {
  * Check if task.json exists
  */
 export function hasTasks(dir: string): boolean {
-  return fs.existsSync(path.join(dir, "task.json"));
+  return fs.existsSync(getTaskPath(dir));
 }
 
 /**
@@ -57,11 +58,4 @@ export function getSpecPath(dir: string): string {
     return standardPath;
   }
   return altPath;
-}
-
-/**
- * Get task file path
- */
-export function getTaskPath(dir: string): string {
-  return path.join(dir, "task.json");
 }

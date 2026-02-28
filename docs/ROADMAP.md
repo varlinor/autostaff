@@ -108,7 +108,7 @@
 - 实现关注点分离，便于扩展
 
 **已完成**：
-- [x] 创建 `@varlinor/auto-bot-core` 包
+- [x] 创建 `@varlinor/autostaff-core` 包
 - [x] 抽取 task.json 解析逻辑（parseTasks, topologicalSort）
 - [x] 抽取工作区检测逻辑（detectProjectType, findWorkspaceRoot）
 - [x] 抽取阶段检测逻辑（detectPhase）
@@ -134,6 +134,7 @@
 **已完成**：
 - [x] task.json 创建、检查、阶段判断
 - [x] progress.txt 初始化、更新
+- [ ] task.json 和 progress.txt 移至目标 project-dir/.autostaff/ 目录
 - [x] 长时间任务执行、状态收集、记录
 - [x] git 提交及 Conventional Commits 格式约束
 - [x] 代码相关 agent 和检查要求
@@ -239,8 +240,8 @@ auto-code-bot/
 │   │   ├── package.json            ✅ name: "auto-bot"
 │   │   └── src/
 │   │       └── index.ts           ✅ 子命令入口
-│   ├── core/                       ✅ (@varlinor/auto-bot-core)
-│   │   ├── package.json            ✅ name: "@varlinor/auto-bot-core"
+│   ├── core/                       ✅ (@varlinor/autostaff-core)
+│   │   ├── package.json            ✅ name: "@varlinor/autostaff-core"
 │   │   └── src/
 │   │       ├── index.ts
 │   │       ├── types.ts

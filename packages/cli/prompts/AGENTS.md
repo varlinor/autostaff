@@ -15,9 +15,9 @@ Start by orienting yourself:
 
 1. Check your working directory: `pwd`
 2. List files: `ls -la` (or `dir` on Windows)
-3. Read the project specification: `app_spec.md` (or `app_spec.txt`)
-4. Read the task list: `task.json`
-5. Read progress notes: `progress.txt`
+3. Read the project specification: `docs/app_spec.md` (or `app_spec.txt`)
+4. Read the task list: `.autostaff/task.json`
+5. Read progress notes: `.autostaff/progress.txt`
 6. Check recent git history: `git log --oneline -20`
 7. Count remaining tasks: how many have `"passes": false`
 

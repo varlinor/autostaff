@@ -148,7 +148,28 @@ cd packages/cli
 npx tsx src/auto-dev.ts <project-dir> --ulw --model deepseek/deepseek-chat
 ```
 
-### 静默模式
+### 详细模式（Verbose）
+
+使用 `--verbose` 参数将 opencode 输出打印到控制台：
+
+```bash
+cd packages/cli
+# 默认模式：opencode 输出写入日志文件
+npx tsx src/auto-dev.ts <project-dir> --ulw
+
+# 详细模式：输出到控制台
+npx tsx src/auto-dev.ts <project-dir> --ulw --verbose
+
+# 指定日志文件路径
+npx tsx src/auto-dev.ts <project-dir> --ulw --verbose --log-file ./logs/bot.log
+```
+
+**说明**：
+- 默认模式（无 --verbose）：opencode 输出写入日志文件
+- 详细模式（--verbose）：opencode 输出打印到控制台
+- 日志文件默认为项目目录下的 `auto-code-bot-detail.log`
+- 日志带时间戳，便于问题排查
+- logFile 支持绝对路径或相对于 project-dir 的路径
 
 将 opencode 输出写入文件，减少控制台干扰：
 
