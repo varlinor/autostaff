@@ -44,8 +44,13 @@ Step 2: 用 auto-code-bot 执行任务直到完成
 - 自动生成符合 Conventional Commits 格式的提交信息
 - 自动更新版本号与 Changelog
 
+### CLI 为当前主要使用方式
+- CLI 是当前主要的运行方式，经过充分测试和使用
+- 推荐使用 CLI 方式进行项目开发
+
 ### MCP 服务器集成
 - 提供 MCP 协议支持，可直接对接 Claude Desktop、Cursor 等 IDE
+- ⚠️ **MCP 功能待验证** - 目前尚未经过充分测试，使用前请注意风险
 
 ---
 
@@ -75,6 +80,7 @@ packages/
 ---
 
 ## 目录结构
+
 ---
 
 ## 目录结构
@@ -145,6 +151,8 @@ pnpm dev:mcp
 ---
 
 ## MCP 服务器
+
+> ⚠️ **MCP 功能待验证** - 目前尚未经过充分测试，使用前请注意风险
 
 详细配置说明见 [docs/mcp.md](docs/mcp.md)。
 
