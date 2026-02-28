@@ -49,14 +49,14 @@ opencode
 ```bash
 # 仅生成 app_spec.md 和 task.json，不执行
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --init-only
+npx tsx src/index.ts <project-dir> --init-only
 ```
 
 **方式 B：使用 --max-iterations 2**
 ```bash
 # 限制迭代次数为 2
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --max-iterations 2
+npx tsx src/index.ts <project-dir> --max-iterations 2
 ```
 
 **说明**：
@@ -101,7 +101,7 @@ opencode
 ```bash
 # 启用 ULW 模式执行
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --ulw
+npx tsx src/index.ts <project-dir> --ulw
 ```
 
 **输出**：完整的项目实现
@@ -128,7 +128,7 @@ npx tsx src/auto-dev.ts <project-dir> --ulw
 
 ```bash
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --extend --ulw
+npx tsx src/index.ts <project-dir> --extend --ulw
 ```
 
 ### 限制执行轮数
@@ -138,14 +138,14 @@ npx tsx src/auto-dev.ts <project-dir> --extend --ulw
 ```bash
 # 只执行 3 轮
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --ulw --max-iterations 3
+npx tsx src/index.ts <project-dir> --ulw --max-iterations 3
 ```
 
 ### 指定模型
 
 ```bash
 cd packages/cli
-npx tsx src/auto-dev.ts <project-dir> --ulw --model deepseek/deepseek-chat
+npx tsx src/index.ts <project-dir> --ulw --model deepseek/deepseek-chat
 ```
 
 ### 详细模式（Verbose）
@@ -155,13 +155,13 @@ npx tsx src/auto-dev.ts <project-dir> --ulw --model deepseek/deepseek-chat
 ```bash
 cd packages/cli
 # 默认模式：opencode 输出写入日志文件
-npx tsx src/auto-dev.ts <project-dir> --ulw
+npx tsx src/index.ts <project-dir> --ulw
 
 # 详细模式：输出到控制台
-npx tsx src/auto-dev.ts <project-dir> --ulw --verbose
+npx tsx src/index.ts <project-dir> --ulw --verbose
 
 # 指定日志文件路径
-npx tsx src/auto-dev.ts <project-dir> --ulw --verbose --log-file ./logs/bot.log
+npx tsx src/index.ts <project-dir> --ulw --verbose --log-file ./logs/bot.log
 ```
 
 **说明**：
@@ -176,10 +176,10 @@ npx tsx src/auto-dev.ts <project-dir> --ulw --verbose --log-file ./logs/bot.log
 ```bash
 cd packages/cli
 # 静默模式：opencode 输出写文件
-npx tsx src/auto-dev.ts <project-dir> --ulw --silent
+npx tsx src/index.ts <project-dir> --ulw --silent
 
 # 指定日志文件路径
-npx tsx src/auto-dev.ts <project-dir> --ulw --silent --log-file ./logs/bot.log
+npx tsx src/index.ts <project-dir> --ulw --silent --log-file ./logs/bot.log
 ```
 
 **说明**：
@@ -279,7 +279,7 @@ app_spec.md 中的每个功能都有对应的任务：
 **解决**：
 ```bash
 # 继续执行
-npx tsx src/auto-dev.ts <project-dir> --ulw
+npx tsx src/index.ts <project-dir> --ulw
 ```
 
 ---

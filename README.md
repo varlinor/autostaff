@@ -183,7 +183,7 @@ pnpm dev:mcp
 cd packages/cli
 
 # 运行 CLI（推荐方式）
-npx tsx src/auto-dev.ts "D:\你的项目路径" --ulw --max-iterations 2
+npx tsx src/index.ts "D:\你的项目路径" --ulw --max-iterations 2
 ```
 
 ### 参数说明
@@ -233,23 +233,23 @@ Phase 4: 执行任务
 ```powershell
 # 在当前工程运行，自动检测 docs/app_spec.md
 cd packages/cli
-npx tsx src/auto-dev.ts "D:\workspaces\fe-workspace\my-project" --ulw
+npx tsx src/index.ts "D:\workspaces\fe-workspace\my-project" --ulw
 
 # 指定最大迭代次数
 cd packages/cli
-npx tsx src/auto-dev.ts "D:\workspaces\fe-workspace\my-project" --ulw --max-iterations 5
+npx tsx src/index.ts "D:\workspaces\fe-workspace\my-project" --ulw --max-iterations 5
 
 # 使用指定模型
 cd packages/cli
-npx tsx src/auto-dev.ts "D:\workspaces\fe-workspace\my-project" --ulw -m deepseek/deepseek-chat
+npx tsx src/index.ts "D:\workspaces\fe-workspace\my-project" --ulw -m deepseek/deepseek-chat
 
 # 继续之前中断的任务
 cd packages/cli
-npx tsx src/auto-dev.ts "D:\workspaces\fe-workspace\my-project" --ulw
+npx tsx src/index.ts "D:\workspaces\fe-workspace\my-project" --ulw
 
 # 追加新功能
 cd packages/cli
-npx tsx src/auto-dev.ts "D:\workspaces\fe-workspace\my-project" --extend --ulw
+npx tsx src/index.ts "D:\workspaces\fe-workspace\my-project" --extend --ulw
 ```
 
 ### 注意事项
