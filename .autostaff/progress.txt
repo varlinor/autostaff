@@ -29,7 +29,7 @@
 - Fixed changeset baseBranch from "main" to "develop" (branch doesn't exist)
 - Added MCP documentation (docs/mcp.md) with configuration examples
 - Updated README.md with MCP section and link to docs/mcp.md
-XB|- 8/8 tasks passing - all complete!
+- 8/8 tasks passing - all complete!
 
 ---
 
@@ -37,9 +37,9 @@ XB|- 8/8 tasks passing - all complete!
 
 ### Completed Tasks
 - task-docs-1: Update project_status.md ✅
+- task-changeset-1: Configure changesets for cli/code/text same version ✅
 
 ### In Progress
-- task-changeset-1: Configure changesets
 - task-readme-1: Update README
 - task-test-1: Write tests
 
@@ -51,4 +51,6 @@ XB|- 8/8 tasks passing - all complete!
 - Removed non-existent loadProgress/saveProgress imports
 - Build verification: pnpm build passes
 - Test verification: pnpm test passes (54 tests)
-- 1/4 tasks complete
+- Changesets config: fixed array with [auto-staff, auto-code, auto-text] for same version release
+- Changesets config: updateInternalDependents: always for core dependency updates
+- 2/4 tasks complete
