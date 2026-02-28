@@ -1,0 +1,64 @@
+{
+  "tasks": [
+    {
+      "id": "task-text-1",
+      "category": "content",
+      "description": "Create blog post outline",
+      "steps": [
+        "Read docs/content_spec.md to understand content requirements",
+        "Create outline with introduction, main sections, and conclusion",
+        "Verify: Outline has at least 3 main sections"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-text-2",
+      "category": "content", 
+      "description": "Write introduction section",
+      "dependsOn": ["task-text-1"],
+      "steps": [
+        "Write engaging introduction (100-200 words)",
+        "Include hook and topic overview",
+        "Verify: Word count between 100-200"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-text-3",
+      "category": "content",
+      "description": "Write main content sections",
+      "dependsOn": ["task-text-2"],
+      "steps": [
+        "Write each main section with detailed explanations",
+        "Include examples where appropriate",
+        "Verify: Each section has at least 200 words"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-text-4",
+      "category": "content",
+      "description": "Write conclusion section",
+      "dependsOn": ["task-text-3"],
+      "steps": [
+        "Summarize key points",
+        "Include call-to-action if applicable",
+        "Verify: Conclusion has 50-100 words"
+      ],
+      "passes": false
+    },
+    {
+      "id": "task-text-5",
+      "category": "content",
+      "description": "Final review and formatting",
+      "dependsOn": ["task-text-4"],
+      "steps": [
+        "Check for grammar and spelling errors",
+        "Verify proper heading hierarchy",
+        "Ensure front matter is complete (title, date, description)",
+        "Verify: Validator passes with minWordCount=500"
+      ],
+      "passes": false
+    }
+  ]
+}
